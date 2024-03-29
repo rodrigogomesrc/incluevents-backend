@@ -1,19 +1,34 @@
 package br.ufrn.imd.incluevents.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import br.ufrn.imd.incluevents.model.enums.OrigemEventoEnum;
+import jakarta.persistence.*;
 
 import java.util.Date;
+import java.util.Set;
 
 @Entity
-@Table
+@Table(name = "evento")
 public class Evento {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nome;
+    private String local;
+    @Column(length = 3000)
+    private String descricao;
+    private String urlOriginal;
+    private String imagemUrl;
     private Date inicio;
     private Date fim;
+    private OrigemEventoEnum origem;
+
+    @ManyToMany
+    @JoinTable(
+            name = "evento_categoria",
+            joinColumns = @JoinColumn(name = "evento_id"),
+            inverseJoinColumns = @JoinColumn(name = "categoria_id"))
+    private Set<Categoria> categorias;
 
     //TODO: Add Estabelecimento, Feedbacks e Selos
 
@@ -34,6 +49,14 @@ public class Evento {
         this.nome = nome;
     }
 
+    public String getLocal() {
+        return local;
+    }
+
+    public void setLocal(String local) {
+        this.local = local;
+    }
+
     public Date getInicio() {
         return inicio;
     }
@@ -48,5 +71,59 @@ public class Evento {
 
     public void setFim(Date fim) {
         this.fim = fim;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public String getUrlOriginal() {
+        return urlOriginal;
+    }
+
+    public void setUrlOriginal(String urlOriginal) {
+        this.urlOriginal = urlOriginal;
+    }
+
+    public String getImagemUrl() {
+        return imagemUrl;
+    }
+
+    public void setImagemUrl(String imagemUrl) {
+        this.imagemUrl = imagemUrl;
+    }
+
+    public OrigemEventoEnum getOrigem() {
+        return origem;
+    }
+
+    public void setOrigem(OrigemEventoEnum origem) {
+        this.origem = origem;
+    }
+
+    public Set<Categoria> getCategorias() {
+        return categorias;
+    }
+
+    public void setCategorias(Set<Categoria> categorias) {
+        this.categorias = categorias;
+    }
+
+    @Override
+    public String toString() {
+        return "Evento{" +
+                "id=" + id +
+                ", nome='" + nome + '\'' +
+                ", descricao='" + descricao + '\'' +
+                ", urlOriginal='" + urlOriginal + '\'' +
+                ", imagemUrl='" + imagemUrl + '\'' +
+                ", inicio=" + inicio +
+                ", fim=" + fim +
+                ", origem=" + origem +
+                '}';
     }
 }

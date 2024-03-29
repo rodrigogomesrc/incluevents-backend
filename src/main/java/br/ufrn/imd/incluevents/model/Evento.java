@@ -11,7 +11,7 @@ import java.util.Set;
 public class Evento {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String nome;
     private String local;
@@ -23,7 +23,7 @@ public class Evento {
     private Date fim;
     private OrigemEventoEnum origem;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
             name = "evento_categoria",
             joinColumns = @JoinColumn(name = "evento_id"),

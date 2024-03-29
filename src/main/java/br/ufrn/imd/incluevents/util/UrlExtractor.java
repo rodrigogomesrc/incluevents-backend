@@ -6,7 +6,6 @@ import java.net.URL;
 public class UrlExtractor {
     public static String extractBaseUrl(String urlString) {
         try {
-            System.out.println("URL: " + urlString);
             URL url = new URL(urlString);
             return url.getProtocol() + "://" + url.getHost();
         } catch (MalformedURLException e) {

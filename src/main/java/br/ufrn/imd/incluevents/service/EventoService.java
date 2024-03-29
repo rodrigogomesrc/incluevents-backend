@@ -18,4 +18,12 @@ public class EventoService {
     public List<Evento> findAll(){
         return repository.findAll();
     }
+
+    public Evento save(Evento evento){
+        return repository.save(evento);
+    }
+
+    public List<Evento> saveAll(List<Evento> eventos){
+        return repository.saveAll(eventos);
+    }
 }

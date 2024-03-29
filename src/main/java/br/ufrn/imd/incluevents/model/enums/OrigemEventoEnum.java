@@ -4,5 +4,5 @@ public enum OrigemEventoEnum {
     PREFEITURA,
     OUTGO,
     SYMPLA,
-    CADASTRO
+    CADASTRO;
 }

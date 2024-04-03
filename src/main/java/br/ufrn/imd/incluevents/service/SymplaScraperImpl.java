@@ -7,7 +7,11 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -16,6 +20,7 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import br.ufrn.imd.incluevents.model.Categoria;
 import br.ufrn.imd.incluevents.model.Evento;
 import br.ufrn.imd.incluevents.model.enums.OrigemEventoEnum;
 
@@ -33,14 +38,22 @@ public class SymplaScraperImpl implements EventScraper {
 
     @Override
     public List<Evento> scrape() {
-        List<Evento> listaEventos = scrapeList();
+        HashMap<String, Evento> eventosPorUrl = new HashMap<>();
 
-        return listaEventos;
+        this.scrapeList(eventosPorUrl);
+
+        this.scrapeCategory("Gastronomia", "1-gastronomia", eventosPorUrl);
+        this.scrapeCategory("Festas e shows", "17-festas-e-shows", eventosPorUrl);
+        this.scrapeCategory("Cursos e Workshops", "8-curso-e-workshops", eventosPorUrl);
+        this.scrapeCategory("Congressos e Palestras", "4-congressos-e-palestras", eventosPorUrl);
+        this.scrapeCategory("Arte, Cinema e Lazer", "10-arte-cinema-e-lazer", eventosPorUrl);
+        this.scrapeCategory("Esportes", "2-esportes", eventosPorUrl);
+        this.scrapeCategory("Saúde e Bem-Estar", "9-saude-e-bem-estar", eventosPorUrl);
+
+        return new ArrayList<>(eventosPorUrl.values());
     }
 
-    public List<Evento> scrapeList() {
-        ArrayList<Evento> eventos = new ArrayList<>();
-
+    private void scrapeList(Map<String, Evento> eventosPorUrl) {
         Elements elementos;
         int numeroPagina = 1;
 
@@ -66,7 +79,14 @@ public class SymplaScraperImpl implements EventScraper {
                 Date dataInicio = dates.size() > 0 ? parseDate(dates.get(0).text()) : null;
                 Date dataFim = dates.size() > 1 ? parseDate(dates.get(1).text()) : null;
 
-                Evento evento = new Evento();
+                Evento evento;
+
+                if (eventosPorUrl.containsKey(link)) {
+                    evento = eventosPorUrl.get(link);
+                } else {
+                    evento = new Evento();
+                    eventosPorUrl.put(link, evento);
+                }
 
                 evento.setOrigem(OrigemEventoEnum.SYMPLA);
                 evento.setUrlOriginal(link);
@@ -75,14 +95,48 @@ public class SymplaScraperImpl implements EventScraper {
                 evento.setLocal(local);
                 evento.setInicio(dataInicio);
                 evento.setFim(dataFim);
-
-                eventos.add(evento);
             });
 
             numeroPagina++;
         } while (elementos.size() > 0);
+    }
 
-        return eventos;
+    private void scrapeCategory(String nomeCategoria, String idCategoria, Map<String, Evento> eventosPorUrl) {
+        this.waitOneSecond();
+
+        Categoria categoria = new Categoria(nomeCategoria);
+
+        Elements elementos;
+        int numeroPagina = 1;
+
+        do {
+            String url = this.url + "?page=" + numeroPagina + "&cl=" + idCategoria;
+            String html = pageRetriever.getHtmlCode(url);
+
+            Document pagina = Jsoup.parse(html);
+
+            elementos = pagina.select(".CustomGridstyle__CustomGridCardType-sc-1ce1n9e-2");
+
+            elementos.forEach(elemento -> {
+                Element linkElement = elemento.selectFirst("a");
+
+                String link = linkElement != null ? linkElement.attr("href") : null;
+                Evento evento = eventosPorUrl.get(link);
+
+                if (evento != null) {
+                    Set<Categoria> categorias = evento.getCategorias();
+
+                    if (categorias == null) {
+                        categorias = new HashSet<>();
+                        evento.setCategorias(categorias);
+                    }
+
+                    categorias.add(categoria);
+                }
+            });
+
+            numeroPagina++;
+        } while (elementos.size() > 0);
     }
 
     private Date parseDate(String date) {
@@ -167,6 +221,14 @@ public class SymplaScraperImpl implements EventScraper {
                 return 12;
             default:
                 return 1;
+        }
+    }
+
+    private void waitOneSecond() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }

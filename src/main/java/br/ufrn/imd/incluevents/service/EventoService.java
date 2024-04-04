@@ -36,7 +36,7 @@ public class EventoService {
         return repository.saveAll(eventos);
     }
 
-    //@Scheduled(cron="0 0 5 1/1 * ? *")
+    @Scheduled(cron="0 0 5 * * ?")
     public List<Evento> scrapeAndSave() {
         List<Evento> eventosSalvos = this.findAll();
         Map<String, Evento> eventosSalvosPorUrl = eventosSalvos.stream().collect(Collectors.toMap(Evento::getUrlOriginal, evento -> evento));

@@ -55,4 +55,19 @@ public class EventoService {
 
         return this.saveAll(eventosMinerados);
     }
+
+    public Evento getById(Integer id){
+        return repository.getById(id);
+    }
+
+    public Evento update(Evento evento) {
+        if (repository.existsById(evento.getId())) {
+            return repository.save(evento);
+        }
+        return null;
+    }
+
+    public void deleteById(Integer id) {
+        repository.deleteById(id);
+    }
 }

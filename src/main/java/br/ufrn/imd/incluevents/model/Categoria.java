@@ -1,5 +1,6 @@
 package br.ufrn.imd.incluevents.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -7,6 +8,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "categoria")
+@JsonIgnoreProperties({"eventos"})
 public class Categoria {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

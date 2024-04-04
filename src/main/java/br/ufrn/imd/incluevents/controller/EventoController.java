@@ -8,6 +8,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/eventos")
+@CrossOrigin(origins = "http://localhost:3000")
 public class EventoController {
 
     private final EventoService service;
@@ -19,6 +20,11 @@ public class EventoController {
     @GetMapping
     public List<Evento> findAll() {
         return service.findAll();
+    }
+
+    @GetMapping("/paginated/{page}/{pageSize}")
+    public List<Evento> findPaginated(@PathVariable Integer page, @PathVariable Integer pageSize) {
+        return service.findPaginated(page, pageSize);
     }
 
     @PostMapping

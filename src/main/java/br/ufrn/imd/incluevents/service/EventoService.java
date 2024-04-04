@@ -3,6 +3,8 @@ package br.ufrn.imd.incluevents.service;
 import br.ufrn.imd.incluevents.model.Evento;
 import br.ufrn.imd.incluevents.repository.EventoRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -69,5 +71,10 @@ public class EventoService {
 
     public void deleteById(Integer id) {
         repository.deleteById(id);
+    }
+
+    public List<Evento> findPaginated(Integer page, Integer pageSize) {
+        Page<Evento> eventPage = repository.findAll(PageRequest.of(page - 1, pageSize));
+        return eventPage.getContent();
     }
 }

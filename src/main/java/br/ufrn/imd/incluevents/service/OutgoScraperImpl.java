@@ -11,10 +11,9 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 public class OutgoScraperImpl implements EventScraper {
@@ -40,6 +39,7 @@ public class OutgoScraperImpl implements EventScraper {
         Document pagina;
         System.out.println("Scraping outgo...");
         String html = pageRetriever.getHtmlCode(url);
+        System.out.println("html retrieved");
         pagina = Jsoup.parse(html);
         Elements elementos = pagina.select("card-event");
 
@@ -51,8 +51,20 @@ public class OutgoScraperImpl implements EventScraper {
             String link = linkContainer != null ? linkContainer.attr("href") : null;
             String imgUrl = imgUrlElement != null ? imgUrlElement.absUrl("src") : null;
             String titulo = informacoes != null ? informacoes.select(".cardEvent-title").text() : null;
+            String data = informacoes != null ? informacoes.select(".cardEvent-date").text() : null;
 
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy 'às' HH:mm");
+
+            Date date = null;
+            try {
+                date = sdf.parse(data);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
             Evento evento = new Evento();
+            if (date != null) {
+                evento.setInicio(date);
+            }
             evento.setImagemUrl(imgUrl);
             evento.setNome(titulo);
             evento.setUrlOriginal(link);

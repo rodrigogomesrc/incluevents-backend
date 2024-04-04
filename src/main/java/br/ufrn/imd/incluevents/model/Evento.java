@@ -12,7 +12,7 @@ public class Evento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Integer id;
     private String nome;
     private String local;
     @Column(length = 3000)
@@ -33,11 +33,11 @@ public class Evento {
     //TODO: Add Estabelecimento, Feedbacks e Selos
 
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

@@ -17,13 +17,11 @@ import java.util.stream.Collectors;
 public class EventoService {
 
     private final EventoRepository repository;
-    private final SymplaScraperImpl symplaScraper;
-    private final OutgoScraperImpl outgoScraper;
+    private final List<EventScraper> scrapers;
 
-    public EventoService(EventoRepository repository, SymplaScraperImpl symplaScraper, OutgoScraperImpl outgoScraper) {
+    public EventoService(EventoRepository repository, List<EventScraper> scrapers) {
         this.repository = repository;
-        this.symplaScraper = symplaScraper;
-        this.outgoScraper = outgoScraper;
+        this.scrapers = scrapers;
     }
 
     public List<Evento> findAll(){
@@ -44,8 +42,9 @@ public class EventoService {
         Map<String, Evento> eventosSalvosPorUrl = eventosSalvos.stream().collect(Collectors.toMap(Evento::getUrlOriginal, evento -> evento));
 
         List<Evento> eventosMinerados = new ArrayList<>();
-        eventosMinerados.addAll(symplaScraper.scrape());
-        eventosMinerados.addAll(outgoScraper.scrape());
+        scrapers.forEach(scraper -> {
+            eventosMinerados.addAll(scraper.scrape());
+        });
 
         eventosMinerados.forEach(evento -> {
             Evento eventoSalvo = eventosSalvosPorUrl.get(evento.getUrlOriginal());

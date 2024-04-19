@@ -3,12 +3,12 @@ package br.ufrn.imd.incluevents.service;
 import br.ufrn.imd.incluevents.model.Evento;
 import br.ufrn.imd.incluevents.repository.EventoRepository;
 
+import jdk.jfr.Event;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,18 +37,14 @@ public class EventoService {
     }
 
     @Scheduled(cron="0 0 5 * * ?")
-    public List<Evento> scrapeAndSave() {
-        List<Evento> eventosSalvos = this.findAll();
-        Map<String, Evento> eventosSalvosPorUrl = eventosSalvos.stream().collect(Collectors.toMap(Evento::getUrlOriginal, evento -> evento));
+    public List<Evento> scrapeAndSave(List<Evento> eventosMinerados) {
+        List<String> scrapedUrls = eventosMinerados.stream().map(Evento::getUrlOriginal).collect(Collectors.toList());
 
-        List<Evento> eventosMinerados = new ArrayList<>();
-        scrapers.forEach(scraper -> {
-            eventosMinerados.addAll(scraper.scrape());
-        });
+        Map<String, Evento> eventosSalvosPorUrl = this.findByUrlsOriginals(scrapedUrls)
+                .stream().collect(Collectors.toMap(Evento::getUrlOriginal, evento -> evento));
 
         eventosMinerados.forEach(evento -> {
             Evento eventoSalvo = eventosSalvosPorUrl.get(evento.getUrlOriginal());
-
             if (eventoSalvo != null) {
                 evento.setId(eventoSalvo.getId());
             }
@@ -75,5 +71,9 @@ public class EventoService {
     public List<Evento> findPaginated(Integer page, Integer pageSize) {
         Page<Evento> eventPage = repository.findAll(PageRequest.of(page - 1, pageSize));
         return eventPage.getContent();
+    }
+
+    public List<Evento> findByUrlsOriginals(List<String> urls) {
+        return repository. findByUrlOriginals(urls);
     }
 }

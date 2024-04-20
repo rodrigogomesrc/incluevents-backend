@@ -1,4 +1,5 @@
 package br.ufrn.imd.incluevents.service;
+import br.ufrn.imd.incluevents.exceptions.SeloNotFoundException;
 import br.ufrn.imd.incluevents.model.Selo;
 import br.ufrn.imd.incluevents.repository.SeloRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,11 @@ public class SeloService {
     public ResponseEntity<Selo> getById(Integer id) {
         Optional<Selo> selo = seloRepository.findById(id);
         return selo.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    public Selo findById(Integer id) throws SeloNotFoundException {
+        Optional<Selo> selo = seloRepository.findById(id);
+        return selo.orElseThrow(SeloNotFoundException::new);
     }
 
     public ResponseEntity<List<Selo>> findAll() {

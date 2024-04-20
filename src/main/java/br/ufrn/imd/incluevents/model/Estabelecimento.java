@@ -1,5 +1,6 @@
 package br.ufrn.imd.incluevents.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.Set;
@@ -14,10 +15,11 @@ public class Estabelecimento {
     private String endereco;
     private String telefone;
 
-    @OneToMany(mappedBy = "estabelecimento")
+    @JsonIgnore
+    @OneToMany(mappedBy = "estabelecimento", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Evento> eventos;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private Set<Selo> selos;
 
     public int getId() {

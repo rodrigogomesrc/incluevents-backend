@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,9 +38,14 @@ public class EventoService {
     }
 
     @Scheduled(cron="0 0 5 * * ?")
-    public List<Evento> scrapeAndSave(List<Evento> eventosMinerados) {
-        List<String> scrapedUrls = eventosMinerados.stream().map(Evento::getUrlOriginal).collect(Collectors.toList());
+    public List<Evento> scrapeAndSave() {
+        List<Evento> eventosMinerados = new ArrayList<>();
 
+        scrapers.forEach(scraper -> {
+            eventosMinerados.addAll(scraper.scrape());
+        });
+
+        List<String> scrapedUrls = eventosMinerados.stream().map(Evento::getUrlOriginal).collect(Collectors.toList());
         Map<String, Evento> eventosSalvosPorUrl = this.findByUrlsOriginals(scrapedUrls)
                 .stream().collect(Collectors.toMap(Evento::getUrlOriginal, evento -> evento));
 

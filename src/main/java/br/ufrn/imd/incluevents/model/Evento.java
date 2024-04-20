@@ -30,8 +30,15 @@ public class Evento {
             inverseJoinColumns = @JoinColumn(name = "categoria_id"))
     private Set<Categoria> categorias;
 
-    //TODO: Add Estabelecimento, Feedbacks e Selos
+    @OneToMany
+    private Set<Selo> selos;
 
+    @ManyToOne
+    @JoinColumn(name = "id_estabelecimento")
+    private Estabelecimento estabelecimento;
+
+    @OneToMany(mappedBy = "evento")
+    private Set<Feedback> feedbacks;
 
     public Integer getId() {
         return id;
@@ -111,6 +118,38 @@ public class Evento {
 
     public void setCategorias(Set<Categoria> categorias) {
         this.categorias = categorias;
+    }
+
+    public void addSelo(Selo selo) {
+        this.selos.add(selo);
+    }
+
+    public void removeSelo(Selo selo) {
+        this.selos.remove(selo);
+    }
+
+    public Set<Selo> getSelos() {
+        return selos;
+    }
+
+    public void setSelos(Set<Selo> selos) {
+        this.selos = selos;
+    }
+
+    public Estabelecimento getEstabelecimento() {
+        return estabelecimento;
+    }
+
+    public void setEstabelecimento(Estabelecimento estabelecimento) {
+        this.estabelecimento = estabelecimento;
+    }
+
+    public Set<Feedback> getFeedbacks() {
+        return feedbacks;
+    }
+
+    public void setFeedbacks(Set<Feedback> feedbacks) {
+        this.feedbacks = feedbacks;
     }
 
     @Override

@@ -3,6 +3,8 @@ package br.ufrn.imd.incluevents.model;
 import br.ufrn.imd.incluevents.model.enums.TipoSeloEnum;
 import jakarta.persistence.*;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "selo")
 public class Selo {
@@ -14,11 +16,13 @@ public class Selo {
     @Enumerated(EnumType.STRING)
     private TipoSeloEnum tipoSelo;
 
-    private Integer idEvento;
-
-    private Integer idEstab;
-
     private Boolean validado;
+
+    @OneToMany(mappedBy = "selo")
+    private Set<Validacao> validacoes;
+
+    public Selo() {
+    }
 
     public Integer getId() {
         return id;
@@ -36,22 +40,6 @@ public class Selo {
         this.tipoSelo = tipoSelo;
     }
 
-    public Integer getIdEvento() {
-        return idEvento;
-    }
-
-    public void setIdEvento(Integer idEvento) {
-        this.idEvento = idEvento;
-    }
-
-    public Integer getIdEstab() {
-        return idEstab;
-    }
-
-    public void setIdEstab(Integer idEstab) {
-        this.idEstab = idEstab;
-    }
-
     public Boolean getValidado() {
         return validado;
     }
@@ -60,13 +48,19 @@ public class Selo {
         this.validado = validado;
     }
 
+    public Set<Validacao> getValidacoes() {
+        return validacoes;
+    }
+
+    public void setValidacoes(Set<Validacao> validacoes) {
+        this.validacoes = validacoes;
+    }
+
     @Override
     public String toString() {
         return "Selo{" +
                 "id=" + id +
                 ", tipoSelo=" + tipoSelo +
-                ", idEvento=" + idEvento +
-                ", idEstab=" + idEstab +
                 ", validado=" + validado +
                 '}';
     }

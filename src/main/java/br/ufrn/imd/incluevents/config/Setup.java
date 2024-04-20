@@ -35,16 +35,14 @@ public class Setup implements ApplicationRunner {
         //eventos.forEach(System.out::println);
         //this.eventoService.saveAll(eventos);
 
-        //List<Evento> eventos = SymplaScraperImpl.scrape();
+        //List<Evento> eventosSimpla = SymplaScraperImpl.scrape();
         //System.out.println("Eventos buscados: ");
-        //eventos.forEach(System.out::println);
-        //this.eventoService.saveAll(eventos);
+        //eventosSimpla.forEach(System.out::println);
+        //this.eventoService.saveAll(eventosSimpla);
 
-        //Ingresse{
         //List<Evento> ingresseEventos = ingresseScraper.scrape();
         //System.out.println("Eventos Ingresse buscados: ");
         //ingresseEventos.forEach(System.out::println);
         //this.eventoService.saveAll(ingresseEventos);
-        //}
     }
 }

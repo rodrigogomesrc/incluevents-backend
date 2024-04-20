@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import br.ufrn.imd.incluevents.model.Estabelecimento;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -38,6 +39,7 @@ public class SymplaScraperImpl implements EventScraper {
 
     @Override
     public List<Evento> scrape() {
+        System.out.println("Scraping sympla...");
         HashMap<String, Evento> eventosPorUrl = new HashMap<>();
 
         this.scrapeList(eventosPorUrl);
@@ -76,9 +78,15 @@ public class SymplaScraperImpl implements EventScraper {
                 String imgUrl = imgElement != null ? imgElement.attr("src") : null;
                 String nome = titleElement != null ? titleElement.text() : null;
                 String local = addressElement != null ? addressElement.text() : null;
-                Date dataInicio = dates.size() > 0 ? parseDate(dates.get(0).text()) : null;
+                Date dataInicio = !dates.isEmpty() ? parseDate(dates.get(0).text()) : null;
                 Date dataFim = dates.size() > 1 ? parseDate(dates.get(1).text()) : null;
 
+                String textoEstabelecimento = "";
+                String textoEndereco = "";
+                if (local != null){
+                    textoEstabelecimento = local.split(" - ")[0];
+                    textoEndereco = local.split(" - ")[1];
+                }
                 Evento evento;
 
                 if (eventosPorUrl.containsKey(link)) {
@@ -93,6 +101,7 @@ public class SymplaScraperImpl implements EventScraper {
                 evento.setImagemUrl(imgUrl);
                 evento.setNome(nome);
                 evento.setLocal(local);
+                evento.setEstabelecimento(new Estabelecimento(textoEstabelecimento, textoEndereco, null));
                 evento.setInicio(dataInicio);
                 evento.setFim(dataFim);
             });

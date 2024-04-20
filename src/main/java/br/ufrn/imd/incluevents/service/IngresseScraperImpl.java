@@ -1,6 +1,7 @@
 package br.ufrn.imd.incluevents.service;
 
 import br.ufrn.imd.incluevents.model.Categoria;
+import br.ufrn.imd.incluevents.model.Estabelecimento;
 import br.ufrn.imd.incluevents.model.Evento;
 import br.ufrn.imd.incluevents.model.enums.OrigemEventoEnum;
 import br.ufrn.imd.incluevents.util.UrlExtractor;
@@ -78,6 +79,8 @@ public class IngresseScraperImpl implements EventScraper {
 
                 Elements subtitulos = segundaPagina.getElementsByClass("ml-2 text-white");
                 String local = (!subtitulos.isEmpty()) ? subtitulos.get(1).text() : "";
+                String estabelecimentoName = local.split(" - ")[0];
+                String endereco = local.split(" - ")[1];
 
                 Element imgUrlElement = segundaPagina.getElementsByClass("flex items-center justify-end h-full").first();
                 String imgUrl = (imgUrlElement != null ? imgUrlElement.getElementsByTag("img").attr("src") : null);
@@ -97,6 +100,7 @@ public class IngresseScraperImpl implements EventScraper {
                         evento.setUrlOriginal(link);
                         evento.setDescricao(truncateString(descricao));
                         evento.setLocal(local);
+                        evento.setEstabelecimento(new Estabelecimento(estabelecimentoName, endereco, null));
                         evento.setInicio(dataEvento);
                         evento.setFim(null);
                         evento.setOrigem(OrigemEventoEnum.INGRESSE);

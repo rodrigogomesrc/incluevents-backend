@@ -11,6 +11,7 @@ public class Estabelecimento {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+    @Column(unique = true)
     private String nome;
     private String endereco;
     private String telefone;
@@ -21,6 +22,16 @@ public class Estabelecimento {
 
     @OneToMany(cascade = CascadeType.ALL)
     private Set<Selo> selos;
+
+    public Estabelecimento(String nome, String endereco, String telefone) {
+        this.nome = nome;
+        this.endereco = endereco;
+        this.telefone = telefone;
+    }
+
+    public Estabelecimento() {
+
+    }
 
     public int getId() {
         return id;

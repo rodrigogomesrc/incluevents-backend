@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 networks:
   incluevents-network:
@@ -12,8 +12,6 @@ services:
     hostname: ${POSTGRESQL_HOST}
     ports:
       - ${POSTGRESQL_PORT_EXTERNAL}:${POSTGRESQL_PORT}
-    volumes:
-      - ${POSTGRESQL_PATH}:/var/lib/postgresql/data
     networks:
       - incluevents-network
     environment:
@@ -23,7 +21,7 @@ services:
       TZ: "America/Fortaleza"
     restart: always
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
       interval: 10s
       timeout: 30s
       retries: 10

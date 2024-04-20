@@ -35,7 +35,7 @@ public class EstabelecimentoService {
             throw new EstabelecimentoNotFoundException();
         }
 
-        Selo selo = seloService.findById(seloId);
+        Selo selo = seloService.getById(seloId);
         Estabelecimento estabelecimento = estabelecimentoOptional.get();
         estabelecimento.getSelos().add(selo);
         return estabelecimentoRepository.save(estabelecimento);

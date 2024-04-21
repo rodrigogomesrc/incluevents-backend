@@ -4,6 +4,7 @@ import br.ufrn.imd.incluevents.dto.CreateUsuarioDto;
 import br.ufrn.imd.incluevents.dto.UpdateUsuarioDto;
 import br.ufrn.imd.incluevents.exceptions.UsuarioEmailJaExisteException;
 import br.ufrn.imd.incluevents.exceptions.UsuarioNotFoundException;
+import br.ufrn.imd.incluevents.exceptions.UsuarioUsernameJaExiste;
 import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.service.UsuarioService;
 import org.springframework.http.HttpStatus;
@@ -38,7 +39,9 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.CREATED).body(createdUsuario);
         }catch (UsuarioEmailJaExisteException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Esse email já existe");
-        } catch (Exception e){
+        }catch (UsuarioUsernameJaExiste e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Esse username já existe");
+        }catch (Exception e){
             logger.error("Erro ao salvar Usuário", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar Usuário");
         }

@@ -1,10 +1,14 @@
 package br.ufrn.imd.incluevents.model;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
 
 @Entity
 @Table(name = "usuario")
-public class Usuario {
+public class Usuario implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -13,7 +17,7 @@ public class Usuario {
     private String email;
     private String username;
     private String senha;
-    private Integer reputacao;
+    private int reputacao;
 
     public Usuario() {
     }
@@ -42,10 +46,6 @@ public class Usuario {
         this.email = email;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
     public void setUsername(String username) {
         this.username = username;
     }
@@ -58,11 +58,44 @@ public class Usuario {
         this.senha = senha;
     }
 
-    public Integer getReputacao() {
+    public int getReputacao() {
         return reputacao;
     }
 
-    public void setReputacao(Integer reputacao) {
+    public void setReputacao(int reputacao) {
         this.reputacao = reputacao;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+    }
+    @Override
+    public String getPassword() {
+        return senha;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

@@ -17,6 +17,7 @@ import br.ufrn.imd.incluevents.dto.CreateValidacaoDto;
 import br.ufrn.imd.incluevents.exceptions.EstabelecimentoNotFoundException;
 import br.ufrn.imd.incluevents.exceptions.EventoNotFoundException;
 import br.ufrn.imd.incluevents.exceptions.SeloJaValidadoException;
+import br.ufrn.imd.incluevents.exceptions.TipoSeloInvalidoException;
 import br.ufrn.imd.incluevents.exceptions.UsuarioNotFoundException;
 import br.ufrn.imd.incluevents.exceptions.ValidacaoNotFoundException;
 import br.ufrn.imd.incluevents.model.Validacao;
@@ -60,6 +61,8 @@ public class ValidacaoController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Selo já validado");
         } catch (UsuarioNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
+        } catch (TipoSeloInvalidoException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Tipo de selo inválido");
         } catch (Exception e) {
             logger.error("Erro ao criar validação", e);
 

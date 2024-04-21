@@ -9,6 +9,7 @@ import br.ufrn.imd.incluevents.dto.CreateValidacaoDto;
 import br.ufrn.imd.incluevents.exceptions.EstabelecimentoNotFoundException;
 import br.ufrn.imd.incluevents.exceptions.EventoNotFoundException;
 import br.ufrn.imd.incluevents.exceptions.SeloJaValidadoException;
+import br.ufrn.imd.incluevents.exceptions.TipoSeloInvalidoException;
 import br.ufrn.imd.incluevents.exceptions.UsuarioNotFoundException;
 import br.ufrn.imd.incluevents.exceptions.ValidacaoJaCriadaException;
 import br.ufrn.imd.incluevents.exceptions.ValidacaoNotFoundException;
@@ -47,17 +48,26 @@ public class ValidacaoService {
         EstabelecimentoNotFoundException,
         SeloJaValidadoException,
         UsuarioNotFoundException,
-        ValidacaoJaCriadaException
+        ValidacaoJaCriadaException,
+        TipoSeloInvalidoException
     {
         Evento evento = null;
         Estabelecimento estabelecimento = null;
         Selo selo;
 
         if (createValidacaoDto.idEvento() != null) {
+            if (!createValidacaoDto.tipoSelo().getTipoEntidade().equals("EVENTO")) {
+                throw new TipoSeloInvalidoException();
+            }
+
             evento = eventoRepository.findById(createValidacaoDto.idEvento()).orElseThrow(EventoNotFoundException::new);
 
             selo = seloRepository.findByEventoAndTipoSelo(evento, createValidacaoDto.tipoSelo()).orElse(null);
         } else {
+            if (!createValidacaoDto.tipoSelo().getTipoEntidade().equals("ESTABELECIMENTO")) {
+                throw new TipoSeloInvalidoException();
+            }
+
             estabelecimento = estabelecimentoRepository.findById(createValidacaoDto.idEstabelecimento()).orElseThrow(EstabelecimentoNotFoundException::new);
 
             selo = seloRepository.findByEstabelecimentoAndTipoSelo(estabelecimento, createValidacaoDto.tipoSelo()).orElse(null);

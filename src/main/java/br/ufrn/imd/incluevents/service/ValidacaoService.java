@@ -9,14 +9,18 @@ import br.ufrn.imd.incluevents.dto.CreateValidacaoDto;
 import br.ufrn.imd.incluevents.exceptions.EstabelecimentoNotFoundException;
 import br.ufrn.imd.incluevents.exceptions.EventoNotFoundException;
 import br.ufrn.imd.incluevents.exceptions.SeloJaValidadoException;
+import br.ufrn.imd.incluevents.exceptions.UsuarioNotFoundException;
+import br.ufrn.imd.incluevents.exceptions.ValidacaoJaCriadaException;
 import br.ufrn.imd.incluevents.exceptions.ValidacaoNotFoundException;
 import br.ufrn.imd.incluevents.model.Estabelecimento;
 import br.ufrn.imd.incluevents.model.Evento;
 import br.ufrn.imd.incluevents.model.Selo;
+import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.model.Validacao;
 import br.ufrn.imd.incluevents.repository.EstabelecimentoRepository;
 import br.ufrn.imd.incluevents.repository.EventoRepository;
 import br.ufrn.imd.incluevents.repository.SeloRepository;
+import br.ufrn.imd.incluevents.repository.UsuarioRepository;
 import br.ufrn.imd.incluevents.repository.ValidacaoRepository;
 import jakarta.transaction.Transactional;
 
@@ -34,8 +38,17 @@ public class ValidacaoService {
     @Autowired
     private SeloRepository seloRepository;
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     @Transactional
-    public Validacao create(CreateValidacaoDto createValidacaoDto) throws EventoNotFoundException, EstabelecimentoNotFoundException, SeloJaValidadoException {
+    public Validacao create(CreateValidacaoDto createValidacaoDto) throws
+        EventoNotFoundException,
+        EstabelecimentoNotFoundException,
+        SeloJaValidadoException,
+        UsuarioNotFoundException,
+        ValidacaoJaCriadaException
+    {
         Evento evento = null;
         Estabelecimento estabelecimento = null;
         Selo selo;
@@ -63,11 +76,18 @@ public class ValidacaoService {
 
         seloRepository.save(selo);
 
+        Usuario usuario = usuarioRepository.findById(createValidacaoDto.idUsuario()).orElseThrow(UsuarioNotFoundException::new);
+
+        if (validacaoRepository.findByUsuarioAndSelo(usuario, selo).isPresent()) {
+            throw new ValidacaoJaCriadaException();
+        }
+
         Validacao validacao = new Validacao();
 
         validacao.setDescricao(createValidacaoDto.descricao());
-        validacao.setVoto(createValidacaoDto.voto());
+        validacao.setVoto(usuario.getReputacao());
         validacao.setSelo(selo);
+        validacao.setUsuario(usuario);
 
         return validacaoRepository.save(validacao);
     }
@@ -76,7 +96,9 @@ public class ValidacaoService {
         return validacaoRepository.findById(id).orElseThrow(ValidacaoNotFoundException::new);
     }
 
-    public List<Validacao> findAll() {
-        return validacaoRepository.findAll();
+    public List<Validacao> getByUsuario(Integer idUsuario) throws UsuarioNotFoundException {
+        Usuario usuario = usuarioRepository.findById(idUsuario).orElseThrow(UsuarioNotFoundException::new);
+
+        return validacaoRepository.findByUsuario(usuario);
     }
 }

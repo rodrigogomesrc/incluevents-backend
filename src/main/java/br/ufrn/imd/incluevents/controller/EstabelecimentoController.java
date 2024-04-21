@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RestController
-@RequestMapping("/estabelecimento")
+@RequestMapping("/estabelecimentos")
 @CrossOrigin(origins = "http://localhost:3000")
 public class EstabelecimentoController {
 

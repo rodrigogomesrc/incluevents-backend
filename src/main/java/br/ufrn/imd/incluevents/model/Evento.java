@@ -33,7 +33,7 @@ public class Evento {
     @OneToMany
     private Set<Selo> selos;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "id_estabelecimento")
     private Estabelecimento estabelecimento;
 

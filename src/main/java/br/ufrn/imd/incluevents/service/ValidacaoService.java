@@ -1,6 +1,8 @@
 package br.ufrn.imd.incluevents.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import br.ufrn.imd.incluevents.model.Evento;
 import br.ufrn.imd.incluevents.model.Selo;
 import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.model.Validacao;
+import br.ufrn.imd.incluevents.model.enums.TipoSeloEnum;
 import br.ufrn.imd.incluevents.repository.EstabelecimentoRepository;
 import br.ufrn.imd.incluevents.repository.EventoRepository;
 import br.ufrn.imd.incluevents.repository.SeloRepository;
@@ -95,7 +98,7 @@ public class ValidacaoService {
         Validacao validacao = new Validacao();
 
         validacao.setDescricao(createValidacaoDto.descricao());
-        validacao.setVoto(usuario.getReputacao());
+        validacao.setVoto(createValidacaoDto.possuiSelo() ? usuario.getReputacao() : -usuario.getReputacao());
         validacao.setSelo(selo);
         validacao.setUsuario(usuario);
 
@@ -110,5 +113,61 @@ public class ValidacaoService {
         Usuario usuario = usuarioRepository.findById(idUsuario).orElseThrow(UsuarioNotFoundException::new);
 
         return validacaoRepository.findByUsuario(usuario);
+    }
+
+    public List<TipoSeloEnum> getDisponiveisByEstabelecimento(int idUsuario, int idEstabelecimento) throws
+        EstabelecimentoNotFoundException,
+        UsuarioNotFoundException
+    {
+        final Estabelecimento estabelecimento = estabelecimentoRepository.findById(idEstabelecimento).orElseThrow(EstabelecimentoNotFoundException::new);
+
+        final Usuario usuario = usuarioRepository.findById(idUsuario).orElseThrow(UsuarioNotFoundException::new);
+
+        return Stream.of(TipoSeloEnum.values())
+            .parallel()
+            .filter(tipoSelo -> {
+                if (!tipoSelo.getTipoEntidade().equals("ESTABELECIMENTO")) {
+                    return false;
+                }
+
+                Selo selo = seloRepository.findByEstabelecimentoAndTipoSelo(estabelecimento, tipoSelo).orElse(null);
+
+                if (selo == null) {
+                    return true;
+                } else if (selo.getValidado()) {
+                    return false;
+                } else {
+                    return !validacaoRepository.findByUsuarioAndSelo(usuario, selo).isPresent();
+                }
+            })
+            .collect(Collectors.toList());
+    }
+
+    public List<TipoSeloEnum> getDisponiveisByEvento(int idUsuario, int idEvento) throws
+        EventoNotFoundException,
+        UsuarioNotFoundException
+    {
+        final Evento evento = eventoRepository.findById(idEvento).orElseThrow(EventoNotFoundException::new);
+
+        final Usuario usuario = usuarioRepository.findById(idUsuario).orElseThrow(UsuarioNotFoundException::new);
+
+        return Stream.of(TipoSeloEnum.values())
+            .parallel()
+            .filter(tipoSelo -> {
+                if (!tipoSelo.getTipoEntidade().equals("EVENTO")) {
+                    return false;
+                }
+
+                Selo selo = seloRepository.findByEventoAndTipoSelo(evento, tipoSelo).orElse(null);
+
+                if (selo == null) {
+                    return true;
+                } else if (selo.getValidado()) {
+                    return false;
+                } else {
+                    return !validacaoRepository.findByUsuarioAndSelo(usuario, selo).isPresent();
+                }
+            })
+            .collect(Collectors.toList());
     }
 }

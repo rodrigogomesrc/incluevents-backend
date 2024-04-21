@@ -1,9 +1,9 @@
 package br.ufrn.imd.incluevents.service;
 
+import br.ufrn.imd.incluevents.exceptions.EventoNotFoundException;
 import br.ufrn.imd.incluevents.model.Evento;
 import br.ufrn.imd.incluevents.repository.EventoRepository;
 
-import jdk.jfr.Event;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -59,8 +59,8 @@ public class EventoService {
         return this.saveAll(eventosMinerados);
     }
 
-    public Evento getById(Integer id){
-        return repository.getById(id);
+    public Evento getById(Integer id) throws EventoNotFoundException {
+        return repository.findById(id).orElseThrow(EventoNotFoundException::new);
     }
 
     public Evento update(Evento evento) {

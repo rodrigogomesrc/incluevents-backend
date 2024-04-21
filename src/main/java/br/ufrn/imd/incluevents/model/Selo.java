@@ -1,9 +1,12 @@
 package br.ufrn.imd.incluevents.model;
 
 import br.ufrn.imd.incluevents.model.enums.TipoSeloEnum;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "selo")
@@ -18,8 +21,19 @@ public class Selo {
 
     private Boolean validado;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "selo")
     private Set<Validacao> validacoes;
+
+    @ManyToOne
+    @JoinColumn(name = "id_estabelecimento")
+    @Nullable
+    private Estabelecimento estabelecimento;
+
+    @ManyToOne
+    @JoinColumn(name = "id_evento")
+    @Nullable
+    private Evento evento;
 
     public Selo() {
     }
@@ -54,6 +68,22 @@ public class Selo {
 
     public void setValidacoes(Set<Validacao> validacoes) {
         this.validacoes = validacoes;
+    }
+
+    public Evento getEvento() {
+        return evento;
+    }
+
+    public void setEvento(Evento evento) {
+        this.evento = evento;
+    }
+
+    public Estabelecimento getEstabelecimento() {
+        return estabelecimento;
+    }
+
+    public void setEstabelecimento(Estabelecimento estabelecimento) {
+        this.estabelecimento = estabelecimento;
     }
 
     @Override

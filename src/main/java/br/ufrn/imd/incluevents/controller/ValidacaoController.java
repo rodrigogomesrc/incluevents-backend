@@ -27,7 +27,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("validacoes")
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "http://localhost:3000")
 public class ValidacaoController {
     private final ValidacaoService validacaoService;
 

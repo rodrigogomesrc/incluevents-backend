@@ -13,7 +13,7 @@ public class Usuario {
     private String email;
     private String username;
     private String senha;
-    private int reputacao;
+    private Integer reputacao;
 
     public Usuario() {
     }
@@ -58,11 +58,11 @@ public class Usuario {
         this.senha = senha;
     }
 
-    public int getReputacao() {
+    public Integer getReputacao() {
         return reputacao;
     }
 
-    public void setReputacao(int reputacao) {
+    public void setReputacao(Integer reputacao) {
         this.reputacao = reputacao;
     }
 }

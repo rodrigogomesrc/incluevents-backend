@@ -17,7 +17,7 @@ import br.ufrn.imd.incluevents.model.enums.TipoSeloEnum;
 
 @RestController
 @RequestMapping("tipos-selo")
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "http://localhost:3000")
 public class TipoSeloController {
     @GetMapping
     public ResponseEntity<?> getTipoSelos(@RequestParam(required = false) final String tipoEntidade) {

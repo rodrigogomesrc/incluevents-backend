@@ -1,7 +1,6 @@
 package br.ufrn.imd.incluevents.controller;
 
-import br.ufrn.imd.incluevents.exceptions.EstabelecimentoNotFoundException;
-import br.ufrn.imd.incluevents.exceptions.SeloNotFoundException;
+import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.model.Estabelecimento;
 import br.ufrn.imd.incluevents.service.EstabelecimentoService;
 import org.springframework.http.HttpStatus;
@@ -30,7 +29,22 @@ public class EstabelecimentoController {
         try {
             Estabelecimento createdEstabelecimento = estabelecimentoService.createEstabelecimento(estabelecimento);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdEstabelecimento);
-        } catch (Exception e) {
+        } catch (BusinessException e) {
+            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
+        } catch (Exception e){
+            logger.error("Erro ao salvar Estabelecimento", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar Estabelecimento");
+        }
+    }
+
+    @PutMapping
+    public ResponseEntity<?> updateEstabelecimento(@RequestBody Estabelecimento estabelecimento) {
+        try {
+            Estabelecimento updatedEstabelecimento = estabelecimentoService.updateEstabelecimento(estabelecimento);
+            return ResponseEntity.ok().body(updatedEstabelecimento);
+        } catch (BusinessException e) {
+            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
+        } catch (Exception e){
             logger.error("Erro ao salvar Estabelecimento", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar Estabelecimento");
         }
@@ -51,19 +65,45 @@ public class EstabelecimentoController {
     }
 
     @PutMapping("/{estabelecimentoId}/selos/{seloId}")
-    public ResponseEntity<?> addSeloToEstabelecimento(
+    public ResponseEntity<?> addSeloToEstabelecimento (
             @PathVariable("estabelecimentoId") int estabelecimentoId,
             @PathVariable("seloId") int seloId) {
         try {
             Estabelecimento estabelecimento = estabelecimentoService.addSeloToEstabelecimento(estabelecimentoId, seloId);
             return ResponseEntity.ok().body(estabelecimento);
-        } catch (EstabelecimentoNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Estabelecimento não encontrado com o id: " + estabelecimentoId);
-        } catch (SeloNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Selo não encontrado com o id: " + seloId);
+        }  catch (BusinessException e) {
+            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Erro ao adicionar selo ao estabelecimento", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar Estabelecimento");
+        }
+    }
+
+    @DeleteMapping("/{estabelecimentoId}/selos/{seloId}")
+    public ResponseEntity<?> removeSeloFromEstabelecimento (
+            @PathVariable("estabelecimentoId") int estabelecimentoId,
+            @PathVariable("seloId") int seloId) {
+        try {
+            Estabelecimento estabelecimento = estabelecimentoService.removeSeloFromEstabelecimento(estabelecimentoId, seloId);
+            return ResponseEntity.ok().body(estabelecimento);
+        }  catch (BusinessException e) {
+            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Erro ao remover selo do estabelecimento", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar Estabelecimento");
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteEstabelecimento(@PathVariable("id") int id) {
+        try {
+            estabelecimentoService.deleteEstabelecimento(id);
+            return ResponseEntity.ok().body("Estabelecimento deletado com sucesso");
+        } catch (BusinessException e) {
+            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Erro ao deletar Estabelecimento", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao deletar Estabelecimento");
         }
     }
 

@@ -1,6 +1,7 @@
 package br.ufrn.imd.incluevents.service;
 
 import br.ufrn.imd.incluevents.model.Categoria;
+import br.ufrn.imd.incluevents.model.Estabelecimento;
 import br.ufrn.imd.incluevents.model.Evento;
 import br.ufrn.imd.incluevents.model.enums.OrigemEventoEnum;
 import br.ufrn.imd.incluevents.util.UrlExtractor;
@@ -89,7 +90,7 @@ public class OutgoScraperImpl implements EventScraper {
         String local2Text = local2Element != null ? local2Element.text() : null;
         String local = local1Text + " | " + local2Text;
         evento.setLocal(local);
-
+        evento.setEstabelecimento(new Estabelecimento(local1Text, local2Text, null));
         Elements categoriasElements = pagina.select(".eventDetail-tags > button");
         Set<Categoria> categorias = new HashSet<>();
         categoriasElements.forEach(element -> {

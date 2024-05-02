@@ -1,7 +1,11 @@
 package br.ufrn.imd.incluevents.controller;
 
+import br.ufrn.imd.incluevents.exceptions.EventoNotFoundException;
 import br.ufrn.imd.incluevents.model.Evento;
 import br.ufrn.imd.incluevents.service.EventoService;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,17 +36,23 @@ public class EventoController {
         return service.save(evento);
     }
 
-    @GetMapping("find/{id}")
-    public Evento findEventoById(@PathVariable Integer id) {
-        return service.getById(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<?> findEventoById(@PathVariable Integer id) {
+        try {
+            Evento evento = service.getById(id);
+
+            return ResponseEntity.status(HttpStatus.OK).body(evento);
+        } catch (EventoNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Evento não encontrado");
+        }
     }
 
-    @PutMapping("update/{id}")
+    @PutMapping("/{id}")
     public Evento updateEvento(@RequestBody Evento evento) {
         return service.update(evento);
     }
 
-    @DeleteMapping("delete/{id}")
+    @DeleteMapping("/{id}")
     public void deleteEvento(@PathVariable Integer id) {
         service.deleteById(id);
     }

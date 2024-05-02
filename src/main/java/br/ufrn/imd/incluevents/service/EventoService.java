@@ -1,5 +1,6 @@
 package br.ufrn.imd.incluevents.service;
 
+import br.ufrn.imd.incluevents.exceptions.EventoNotFoundException;
 import br.ufrn.imd.incluevents.model.Evento;
 import br.ufrn.imd.incluevents.repository.EventoRepository;
 
@@ -38,17 +39,18 @@ public class EventoService {
 
     @Scheduled(cron="0 0 5 * * ?")
     public List<Evento> scrapeAndSave() {
-        List<Evento> eventosSalvos = this.findAll();
-        Map<String, Evento> eventosSalvosPorUrl = eventosSalvos.stream().collect(Collectors.toMap(Evento::getUrlOriginal, evento -> evento));
-
         List<Evento> eventosMinerados = new ArrayList<>();
+
         scrapers.forEach(scraper -> {
             eventosMinerados.addAll(scraper.scrape());
         });
 
+        List<String> scrapedUrls = eventosMinerados.stream().map(Evento::getUrlOriginal).collect(Collectors.toList());
+        Map<String, Evento> eventosSalvosPorUrl = this.findByUrlsOriginals(scrapedUrls)
+                .stream().collect(Collectors.toMap(Evento::getUrlOriginal, evento -> evento));
+
         eventosMinerados.forEach(evento -> {
             Evento eventoSalvo = eventosSalvosPorUrl.get(evento.getUrlOriginal());
-
             if (eventoSalvo != null) {
                 evento.setId(eventoSalvo.getId());
             }
@@ -57,8 +59,8 @@ public class EventoService {
         return this.saveAll(eventosMinerados);
     }
 
-    public Evento getById(Integer id){
-        return repository.getById(id);
+    public Evento getById(Integer id) throws EventoNotFoundException {
+        return repository.findById(id).orElseThrow(EventoNotFoundException::new);
     }
 
     public Evento update(Evento evento) {
@@ -75,5 +77,9 @@ public class EventoService {
     public List<Evento> findPaginated(Integer page, Integer pageSize) {
         Page<Evento> eventPage = repository.findAll(PageRequest.of(page - 1, pageSize));
         return eventPage.getContent();
+    }
+
+    public List<Evento> findByUrlsOriginals(List<String> urls) {
+        return repository. findByUrlOriginals(urls);
     }
 }

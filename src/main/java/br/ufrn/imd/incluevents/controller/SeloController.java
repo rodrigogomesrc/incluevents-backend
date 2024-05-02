@@ -1,7 +1,6 @@
 package br.ufrn.imd.incluevents.controller;
 
-
-import br.ufrn.imd.incluevents.exceptions.SeloNotFoundException;
+import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.model.Selo;
 import br.ufrn.imd.incluevents.service.SeloService;
 import org.slf4j.Logger;
@@ -30,9 +29,8 @@ public class SeloController {
         try {
             Selo createdSelo = seloService.save(selo);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdSelo);
-        } catch (Exception e) {
-            logger.error("Erro ao salvar Selo", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar Selo");
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -41,12 +39,8 @@ public class SeloController {
         try {
             Selo selo = seloService.getById(id);
             return ResponseEntity.ok().body(selo);
-        } catch (SeloNotFoundException e) {
-            logger.error("Selo não encontrado com o id: {}", id, e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Selo não encontrado com o id: " + id);
-        } catch (Exception e) {
-            logger.error("Erro ao buscar Selo", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar Selo");
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -56,12 +50,8 @@ public class SeloController {
         try {
             Selo updatedSelo = seloService.update(selo);
             return ResponseEntity.ok().body(updatedSelo);
-        } catch (SeloNotFoundException e) {
-            logger.error("Selo não encontrado com o id: {}", id, e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Selo não encontrado com o id: " + id);
-        } catch (Exception e) {
-            logger.error("Erro ao atualizar Selo", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao atualizar Selo");
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -70,9 +60,8 @@ public class SeloController {
         try {
             seloService.deleteById(id);
             return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            logger.error("Erro ao deletar Selo", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao deletar Selo");
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -81,9 +70,8 @@ public class SeloController {
         try {
             List<Selo> selos = seloService.findAll();
             return ResponseEntity.ok().body(selos);
-        } catch (Exception e) {
-            logger.error("Erro ao buscar todos os Selos", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar todos os Selos");
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 }

@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.6'
 
 networks:
   incluevents-network:
@@ -12,8 +12,6 @@ services:
     hostname: ${POSTGRESQL_HOST}
     ports:
       - ${POSTGRESQL_PORT_EXTERNAL}:${POSTGRESQL_PORT}
-    volumes:
-      - ${POSTGRESQL_PATH}:/var/lib/postgresql/data
     networks:
       - incluevents-network
     environment:

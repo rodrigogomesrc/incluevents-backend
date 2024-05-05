@@ -1,6 +1,8 @@
 package br.ufrn.imd.incluevents.service;
 
+import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.exceptions.EventoNotFoundException;
+import br.ufrn.imd.incluevents.exceptions.enums.ExceptionTypesEnum;
 import br.ufrn.imd.incluevents.model.Evento;
 import br.ufrn.imd.incluevents.repository.EventoRepository;
 
@@ -29,16 +31,30 @@ public class EventoService {
         return repository.findAll();
     }
 
-    public Evento save(Evento evento){
+    public Evento save(Evento evento) throws BusinessException {
+        if (evento.getNome().isEmpty() || evento.getNome().equals(" ")) {
+            throw new BusinessException("Nome do evento inválido", ExceptionTypesEnum.BAD_REQUEST);
+        }
+        if (evento.getLocal().isEmpty() || evento.getLocal().equals(" ")) {
+            throw new BusinessException("Local do evento inválido", ExceptionTypesEnum.BAD_REQUEST);
+        }
         return repository.save(evento);
     }
 
-    public List<Evento> saveAll(List<Evento> eventos){
+    public List<Evento> saveAll(List<Evento> eventos) throws BusinessException {
+        for (Evento evento : eventos) {
+            if (evento.getNome().isEmpty() || evento.getNome().equals(" ")) {
+                throw new BusinessException("Nome do evento inválido", ExceptionTypesEnum.BAD_REQUEST);
+            }
+            if (evento.getLocal().isEmpty() || evento.getLocal().equals(" ")) {
+                throw new BusinessException("Local do evento inválido", ExceptionTypesEnum.BAD_REQUEST);
+            }
+        }
         return repository.saveAll(eventos);
     }
 
     @Scheduled(cron="0 0 5 * * ?")
-    public List<Evento> scrapeAndSave() {
+    public List<Evento> scrapeAndSave() throws BusinessException {
         List<Evento> eventosMinerados = new ArrayList<>();
 
         scrapers.forEach(scraper -> {
@@ -59,18 +75,33 @@ public class EventoService {
         return this.saveAll(eventosMinerados);
     }
 
-    public Evento getById(Integer id) throws EventoNotFoundException {
-        return repository.findById(id).orElseThrow(EventoNotFoundException::new);
-    }
-
-    public Evento update(Evento evento) {
-        if (repository.existsById(evento.getId())) {
-            return repository.save(evento);
+    public Evento getById(Integer id) throws BusinessException {
+        if (id < 0) {
+            throw new BusinessException("Id do evento inválido", ExceptionTypesEnum.BAD_REQUEST);
         }
-        return null;
+        if(repository.findById(id).isEmpty()){
+            throw new BusinessException("Evento não encontrado", ExceptionTypesEnum.NOT_FOUND);
+        }
+        return repository.findById(id).get();
     }
 
-    public void deleteById(Integer id) {
+    public Evento update(Evento evento) throws BusinessException {
+        if (evento.getNome().isEmpty() || evento.getNome().equals(" ")) {
+            throw new BusinessException("Nome do evento inválido", ExceptionTypesEnum.BAD_REQUEST);
+        }
+        if (evento.getLocal().isEmpty() || evento.getLocal().equals(" ")) {
+            throw new BusinessException("Local do evento inválido", ExceptionTypesEnum.BAD_REQUEST);
+        }
+        if (!repository.existsById(evento.getId())) {
+            throw new BusinessException("Evento não encontrado", ExceptionTypesEnum.NOT_FOUND);
+        }
+        return repository.save(evento);
+    }
+
+    public void deleteById(Integer id) throws BusinessException {
+        if (id < 0) {
+            throw new BusinessException("Id do evento inválido", ExceptionTypesEnum.BAD_REQUEST);
+        }
         repository.deleteById(id);
     }
 

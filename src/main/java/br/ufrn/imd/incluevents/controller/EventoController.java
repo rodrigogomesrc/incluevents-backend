@@ -1,6 +1,6 @@
 package br.ufrn.imd.incluevents.controller;
 
-import br.ufrn.imd.incluevents.exceptions.EventoNotFoundException;
+import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.model.Evento;
 import br.ufrn.imd.incluevents.service.EventoService;
 
@@ -32,28 +32,43 @@ public class EventoController {
     }
 
     @PostMapping
-    public Evento createEvento(@RequestBody Evento evento) {
-        return service.save(evento);
+    public ResponseEntity<?> createEvento(@RequestBody Evento evento) {
+        try {
+            Evento createdEvento = service.save(evento);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdEvento);
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> findEventoById(@PathVariable Integer id) {
         try {
             Evento evento = service.getById(id);
-
             return ResponseEntity.status(HttpStatus.OK).body(evento);
-        } catch (EventoNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Evento não encontrado");
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
     @PutMapping("/{id}")
-    public Evento updateEvento(@RequestBody Evento evento) {
-        return service.update(evento);
+    public ResponseEntity<?> updateEvento(@PathVariable Integer id, @RequestBody Evento evento) {
+        evento.setId(id);
+        try {
+            Evento updatedEvento = service.update(evento);
+            return ResponseEntity.status(HttpStatus.OK).body(updatedEvento);
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void deleteEvento(@PathVariable Integer id) {
-        service.deleteById(id);
+    public ResponseEntity<?> deleteEvento(@PathVariable Integer id) {
+        try {
+            service.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 }

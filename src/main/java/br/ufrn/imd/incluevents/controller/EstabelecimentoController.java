@@ -31,9 +31,6 @@ public class EstabelecimentoController {
             return ResponseEntity.status(HttpStatus.CREATED).body(createdEstabelecimento);
         } catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
-        } catch (Exception e){
-            logger.error("Erro ao salvar Estabelecimento", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar Estabelecimento");
         }
     }
 
@@ -44,9 +41,6 @@ public class EstabelecimentoController {
             return ResponseEntity.ok().body(updatedEstabelecimento);
         } catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
-        } catch (Exception e){
-            logger.error("Erro ao salvar Estabelecimento", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar Estabelecimento");
         }
     }
 
@@ -58,9 +52,8 @@ public class EstabelecimentoController {
                 return ResponseEntity.ok().body(estabelecimentoOptional.get());
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Estabelecimento não encontrado com o id: " + id);
-        } catch (Exception e) {
-            logger.error("Erro ao buscar Estabelecimento", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar Estabelecimento");
+        } catch (BusinessException e) {
+            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
         }
     }
 
@@ -73,9 +66,6 @@ public class EstabelecimentoController {
             return ResponseEntity.ok().body(estabelecimento);
         }  catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
-        } catch (Exception e) {
-            logger.error("Erro ao adicionar selo ao estabelecimento", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar Estabelecimento");
         }
     }
 
@@ -88,9 +78,6 @@ public class EstabelecimentoController {
             return ResponseEntity.ok().body(estabelecimento);
         }  catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
-        } catch (Exception e) {
-            logger.error("Erro ao remover selo do estabelecimento", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar Estabelecimento");
         }
     }
 
@@ -101,9 +88,6 @@ public class EstabelecimentoController {
             return ResponseEntity.ok().body("Estabelecimento deletado com sucesso");
         } catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
-        } catch (Exception e) {
-            logger.error("Erro ao deletar Estabelecimento", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao deletar Estabelecimento");
         }
     }
 

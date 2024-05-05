@@ -1,7 +1,6 @@
 package br.ufrn.imd.incluevents.service;
 
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
-import br.ufrn.imd.incluevents.exceptions.SeloNotFoundException;
 import br.ufrn.imd.incluevents.exceptions.enums.ExceptionTypesEnum;
 import br.ufrn.imd.incluevents.model.Estabelecimento;
 import br.ufrn.imd.incluevents.model.Selo;
@@ -66,7 +65,7 @@ public class EstabelecimentoService {
             Estabelecimento estabelecimento = estabelecimentoOptional.get();
             estabelecimento.getSelos().add(selo);
             return estabelecimentoRepository.save(estabelecimento);
-        } catch (SeloNotFoundException e) {
+        } catch (BusinessException e) {
             throw new BusinessException("Selo não encontrado", ExceptionTypesEnum.NOT_FOUND);
         }
     }
@@ -93,7 +92,7 @@ public class EstabelecimentoService {
             Estabelecimento estabelecimento = estabelecimentoOptional.get();
             estabelecimento.getSelos().remove(selo);
             return estabelecimentoRepository.save(estabelecimento);
-        } catch (SeloNotFoundException e) {
+        } catch (BusinessException e) {
             throw new BusinessException("Selo não encontrado", ExceptionTypesEnum.NOT_FOUND);
         }
     }

@@ -1,5 +1,8 @@
 package br.ufrn.imd.incluevents.controller;
 
+import br.ufrn.imd.incluevents.dto.CreateEstabelecimentoDto;
+import br.ufrn.imd.incluevents.dto.EstabelecimentoDto;
+import br.ufrn.imd.incluevents.dto.UpdateEstabelecimentoDto;
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.model.Estabelecimento;
 import br.ufrn.imd.incluevents.service.EstabelecimentoService;
@@ -25,9 +28,9 @@ public class EstabelecimentoController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createEstabelecimento(@RequestBody Estabelecimento estabelecimento) {
+    public ResponseEntity<?> createEstabelecimento(@RequestBody CreateEstabelecimentoDto estabelecimento) {
         try {
-            Estabelecimento createdEstabelecimento = estabelecimentoService.createEstabelecimento(estabelecimento);
+            EstabelecimentoDto createdEstabelecimento = estabelecimentoService.createEstabelecimento(estabelecimento);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdEstabelecimento);
         } catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
@@ -35,9 +38,9 @@ public class EstabelecimentoController {
     }
 
     @PutMapping
-    public ResponseEntity<?> updateEstabelecimento(@RequestBody Estabelecimento estabelecimento) {
+    public ResponseEntity<?> updateEstabelecimento(@RequestBody UpdateEstabelecimentoDto estabelecimento) {
         try {
-            Estabelecimento updatedEstabelecimento = estabelecimentoService.updateEstabelecimento(estabelecimento);
+            EstabelecimentoDto updatedEstabelecimento = estabelecimentoService.updateEstabelecimento(estabelecimento);
             return ResponseEntity.ok().body(updatedEstabelecimento);
         } catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
@@ -47,7 +50,7 @@ public class EstabelecimentoController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getEstabelecimentoById(@PathVariable("id") int id) {
         try {
-            Optional<Estabelecimento> estabelecimentoOptional = estabelecimentoService.getEstabelecimentoById(id);
+            Optional<EstabelecimentoDto> estabelecimentoOptional = estabelecimentoService.getEstabelecimentoById(id);
             if (estabelecimentoOptional.isPresent()) {
                 return ResponseEntity.ok().body(estabelecimentoOptional.get());
             }
@@ -62,7 +65,7 @@ public class EstabelecimentoController {
             @PathVariable("estabelecimentoId") int estabelecimentoId,
             @PathVariable("seloId") int seloId) {
         try {
-            Estabelecimento estabelecimento = estabelecimentoService.addSeloToEstabelecimento(estabelecimentoId, seloId);
+            EstabelecimentoDto estabelecimento = estabelecimentoService.addSeloToEstabelecimento(estabelecimentoId, seloId);
             return ResponseEntity.ok().body(estabelecimento);
         }  catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
@@ -74,7 +77,7 @@ public class EstabelecimentoController {
             @PathVariable("estabelecimentoId") int estabelecimentoId,
             @PathVariable("seloId") int seloId) {
         try {
-            Estabelecimento estabelecimento = estabelecimentoService.removeSeloFromEstabelecimento(estabelecimentoId, seloId);
+            EstabelecimentoDto estabelecimento = estabelecimentoService.removeSeloFromEstabelecimento(estabelecimentoId, seloId);
             return ResponseEntity.ok().body(estabelecimento);
         }  catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());

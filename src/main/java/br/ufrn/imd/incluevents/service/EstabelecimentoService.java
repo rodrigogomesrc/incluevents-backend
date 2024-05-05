@@ -1,5 +1,8 @@
 package br.ufrn.imd.incluevents.service;
 
+import br.ufrn.imd.incluevents.dto.CreateEstabelecimentoDto;
+import br.ufrn.imd.incluevents.dto.EstabelecimentoDto;
+import br.ufrn.imd.incluevents.dto.UpdateEstabelecimentoDto;
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.exceptions.enums.ExceptionTypesEnum;
 import br.ufrn.imd.incluevents.model.Estabelecimento;
@@ -20,30 +23,51 @@ public class EstabelecimentoService {
         this.seloService = seloService;
     }
 
-    public Estabelecimento createEstabelecimento(Estabelecimento estabelecimento) throws BusinessException {
-        if (estabelecimento.getNome().isEmpty() || estabelecimento.getNome().equals(" ")) {
+    public EstabelecimentoDto createEstabelecimento(CreateEstabelecimentoDto estabelecimento) throws BusinessException {
+        if (estabelecimento.nome().isEmpty() || estabelecimento.nome().equals(" ")) {
             throw new BusinessException("Nome inválido", ExceptionTypesEnum.BAD_REQUEST);
         }
 
-        return estabelecimentoRepository.save(estabelecimento);
+        Estabelecimento newEstabelecimento = new Estabelecimento();
+        newEstabelecimento.setNome(estabelecimento.nome());
+        newEstabelecimento.setEndereco(estabelecimento.endereco());
+        newEstabelecimento.setTelefone(estabelecimento.telefone());
+        Estabelecimento created = estabelecimentoRepository.save(newEstabelecimento);
+        return new EstabelecimentoDto(created.getId(), created.getNome(),
+                created.getEndereco(), created.getTelefone(), created.getSelos());
     }
 
-    public Estabelecimento updateEstabelecimento(Estabelecimento estabelecimento) throws BusinessException {
-        if (estabelecimento.getNome().isEmpty() || estabelecimento.getNome().equals(" ")) {
+    public EstabelecimentoDto updateEstabelecimento(UpdateEstabelecimentoDto estabelecimento) throws BusinessException {
+        if (estabelecimento.nome().isEmpty() || estabelecimento.nome().equals(" ")) {
             throw new BusinessException("Nome inválido", ExceptionTypesEnum.BAD_REQUEST);
         }
-        return estabelecimentoRepository.save(estabelecimento);
+        Estabelecimento estabelecimentoToUpdate = new Estabelecimento();
+        estabelecimentoToUpdate.setId(estabelecimento.id());
+        estabelecimentoToUpdate.setNome(estabelecimento.nome());
+        estabelecimentoToUpdate.setEndereco(estabelecimento.endereco());
+        estabelecimentoToUpdate.setTelefone(estabelecimento.telefone());
+
+        Estabelecimento updated = estabelecimentoRepository.save(estabelecimentoToUpdate);
+        return new EstabelecimentoDto(updated.getId(), updated.getNome(),
+                updated.getEndereco(), updated.getTelefone(), updated.getSelos());
+
     }
 
-    public Optional<Estabelecimento> getEstabelecimentoById(int id) throws BusinessException {
+    public Optional<EstabelecimentoDto> getEstabelecimentoById(int id) throws BusinessException {
         if (id < 0) {
             throw new BusinessException("Id inválido", ExceptionTypesEnum.BAD_REQUEST);
         }
 
-        return estabelecimentoRepository.findById(id);
+        Optional<Estabelecimento> found = estabelecimentoRepository.findById(id);
+        if (found.isEmpty()) {
+            return Optional.empty();
+        }
+        Estabelecimento estabelecimento = found.get();
+        return Optional.of(new EstabelecimentoDto(estabelecimento.getId(), estabelecimento.getNome(),
+                estabelecimento.getEndereco(), estabelecimento.getTelefone(), estabelecimento.getSelos()));
     }
 
-    public Estabelecimento addSeloToEstabelecimento(int estabelecimentoId, int seloId)
+    public EstabelecimentoDto addSeloToEstabelecimento(int estabelecimentoId, int seloId)
             throws BusinessException {
 
         if (estabelecimentoId < 0) {
@@ -60,17 +84,21 @@ public class EstabelecimentoService {
         }
 
         Selo selo;
+        Estabelecimento estabelecimento;
         try {
             selo = seloService.getById(seloId);
-            Estabelecimento estabelecimento = estabelecimentoOptional.get();
+            estabelecimento = estabelecimentoOptional.get();
             estabelecimento.getSelos().add(selo);
-            return estabelecimentoRepository.save(estabelecimento);
+            Estabelecimento saved = estabelecimentoRepository.save(estabelecimento);
+            return new EstabelecimentoDto(saved.getId(), saved.getNome(),
+                    saved.getEndereco(), saved.getTelefone(), saved.getSelos());
+
         } catch (BusinessException e) {
             throw new BusinessException("Selo não encontrado", ExceptionTypesEnum.NOT_FOUND);
         }
     }
 
-    public Estabelecimento removeSeloFromEstabelecimento(int estabelecimentoId, int seloId)
+    public EstabelecimentoDto removeSeloFromEstabelecimento(int estabelecimentoId, int seloId)
             throws BusinessException {
         Optional<Estabelecimento> estabelecimentoOptional = estabelecimentoRepository.findById(estabelecimentoId);
 
@@ -91,7 +119,9 @@ public class EstabelecimentoService {
             selo = seloService.getById(seloId);
             Estabelecimento estabelecimento = estabelecimentoOptional.get();
             estabelecimento.getSelos().remove(selo);
-            return estabelecimentoRepository.save(estabelecimento);
+            Estabelecimento fromRemoved = estabelecimentoRepository.save(estabelecimento);
+            return new EstabelecimentoDto(fromRemoved.getId(), fromRemoved.getNome(),
+                    fromRemoved.getEndereco(), fromRemoved.getTelefone(), fromRemoved.getSelos());
         } catch (BusinessException e) {
             throw new BusinessException("Selo não encontrado", ExceptionTypesEnum.NOT_FOUND);
         }

@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,11 +52,11 @@ public class EstabelecimentoController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getEstabelecimentoById(@PathVariable("id") int id) {
         try {
-            Optional<Estabelecimento> estabelecimentoOptional = estabelecimentoService.getEstabelecimentoById(id);
-            if (estabelecimentoOptional.isPresent()) {
-                return ResponseEntity.ok().body(estabelecimentoOptional.get());
-            }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Estabelecimento não encontrado com o id: " + id);
+            Estabelecimento estabelecimento = estabelecimentoService.getEstabelecimentoById(id);
+
+            return ResponseEntity.ok().body(estabelecimento);
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Estabelecimento não encontrado");
         } catch (Exception e) {
             logger.error("Erro ao buscar Estabelecimento", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar Estabelecimento");

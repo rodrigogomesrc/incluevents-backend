@@ -36,12 +36,14 @@ public class EstabelecimentoService {
         return estabelecimentoRepository.save(estabelecimento);
     }
 
-    public Optional<Estabelecimento> getEstabelecimentoById(int id) throws BusinessException {
+    public Estabelecimento getEstabelecimentoById(int id) throws BusinessException {
         if (id < 0) {
             throw new BusinessException("Id inválido", ExceptionTypesEnum.BAD_REQUEST);
         }
 
-        return estabelecimentoRepository.findById(id);
+        return estabelecimentoRepository.findById(id).orElseThrow(() ->
+            new BusinessException("Estabelecimento não encontrado", ExceptionTypesEnum.NOT_FOUND)
+        );
     }
 
     public Estabelecimento addSeloToEstabelecimento(int estabelecimentoId, int seloId)

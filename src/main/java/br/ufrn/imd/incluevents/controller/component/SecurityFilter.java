@@ -1,8 +1,10 @@
-package br.ufrn.imd.incluevents.component;
+package br.ufrn.imd.incluevents.controller.component;
 
+import br.ufrn.imd.incluevents.exceptions.UsuarioNotFoundException;
 import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.service.TokenService;
 import br.ufrn.imd.incluevents.repository.UsuarioRepository;
+import br.ufrn.imd.incluevents.service.UsuarioService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,11 +19,11 @@ import java.io.IOException;
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
     private final TokenService tokenService;
-    private final UsuarioRepository usuarioRepository;
+    private final UsuarioService usuarioService;
 
-    public SecurityFilter(TokenService tokenService, UsuarioRepository usuarioRepository){
+    public SecurityFilter(TokenService tokenService, UsuarioService usuarioService){
         this.tokenService = tokenService;
-        this.usuarioRepository = usuarioRepository;
+        this.usuarioService = usuarioService;
     }
 
     @Override
@@ -31,10 +33,14 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         if (token != null) {
             String username = tokenService.validateToken(token);
-            Usuario usuario = (Usuario) usuarioRepository.findByUsername(username);
+            try {
+                Usuario usuario = usuarioService.getUsuarioByUsername(username);
+                var authentication = new UsernamePasswordAuthenticationToken(usuario, null, null);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            var authentication = new UsernamePasswordAuthenticationToken(usuario, null, null);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            } catch (UsuarioNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
         filterChain.doFilter(request, response);
     }

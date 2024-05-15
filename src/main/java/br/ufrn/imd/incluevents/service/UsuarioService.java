@@ -7,6 +7,7 @@ import br.ufrn.imd.incluevents.exceptions.UsuarioNotFoundException;
 import br.ufrn.imd.incluevents.exceptions.UsuarioUsernameJaExiste;
 import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.repository.UsuarioRepository;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +51,15 @@ public class UsuarioService {
             throw new UsuarioNotFoundException();
         }
         return usuarioOptional.get();
+    }
+
+    public Usuario getUsuarioByUsername(String username) throws UsuarioNotFoundException {
+
+        Usuario usuario = (Usuario) usuarioRepository.findByUsername(username);
+        if(usuario == null){
+            throw new UsuarioNotFoundException();
+        }
+        return usuario;
     }
 
     public List<Usuario> getUsuarios() throws UsuarioNotFoundException {

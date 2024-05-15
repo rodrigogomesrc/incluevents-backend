@@ -37,11 +37,11 @@ public class UsuarioController {
 
             Usuario createdUsuario = usuarioService.createUsuario(createUsuarioDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdUsuario);
-        }catch (UsuarioEmailJaExisteException e){
+        } catch (UsuarioEmailJaExisteException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Esse email já existe");
-        }catch (UsuarioUsernameJaExiste e){
+        } catch (UsuarioUsernameJaExiste e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Esse username já existe");
-        }catch (Exception e){
+        } catch (Exception e){
             logger.error("Erro ao salvar Usuário", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar Usuário");
         }
@@ -54,7 +54,7 @@ public class UsuarioController {
             return ResponseEntity.ok().body(usuario);
         } catch (UsuarioNotFoundException e) {
             return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado com o id: " + id);
-        }catch (Exception e){
+        } catch (Exception e){
             logger.error("Erro ao buscar Usuário", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar Usuário");
         }
@@ -66,7 +66,7 @@ public class UsuarioController {
             return ResponseEntity.ok().body(usuarios);
         } catch (UsuarioNotFoundException e) {
             return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nenhum Usuário foi encontrado.");
-        }catch (Exception e){
+        } catch (Exception e){
             logger.error("Erro ao buscar Usuário", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar Usuários");
         }
@@ -96,7 +96,7 @@ public class UsuarioController {
             return ResponseEntity.ok().body("Usuário excluído com sucesso!");
         } catch (UsuarioNotFoundException e) {
             return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado com o id: " + id);
-        }catch(Exception e){
+        } catch(Exception e){
             logger.error("Erro ao excluir Usuário", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao excluir Usuário");
         }

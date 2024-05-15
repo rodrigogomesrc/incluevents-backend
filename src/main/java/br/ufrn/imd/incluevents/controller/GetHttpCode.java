@@ -10,6 +10,8 @@ public class GetHttpCode {
                 return org.springframework.http.HttpStatus.NOT_FOUND.value();
             case BAD_REQUEST:
                 return org.springframework.http.HttpStatus.BAD_REQUEST.value();
+            case CONFLICT:
+                return org.springframework.http.HttpStatus.CONFLICT.value();
             default:
                 return org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR.value();
         }

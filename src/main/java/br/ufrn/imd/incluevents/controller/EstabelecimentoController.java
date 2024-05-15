@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,7 @@ public class EstabelecimentoController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getEstabelecimentoById(@PathVariable("id") int id) {
         try {
-            Optional<EstabelecimentoDto> estabelecimentoOptional = estabelecimentoService.getEstabelecimentoById(id);
+            Optional<Estabelecimento> estabelecimentoOptional = estabelecimentoService.getEstabelecimentoById(id);
             if (estabelecimentoOptional.isPresent()) {
                 return ResponseEntity.ok().body(estabelecimentoOptional.get());
             }

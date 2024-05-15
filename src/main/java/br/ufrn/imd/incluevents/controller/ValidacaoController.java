@@ -14,13 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.ufrn.imd.incluevents.dto.CreateValidacaoDto;
-import br.ufrn.imd.incluevents.exceptions.EstabelecimentoNotFoundException;
+import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.exceptions.EventoNotFoundException;
-import br.ufrn.imd.incluevents.exceptions.SeloJaValidadoException;
-import br.ufrn.imd.incluevents.exceptions.TipoSeloInvalidoException;
 import br.ufrn.imd.incluevents.exceptions.UsuarioNotFoundException;
-import br.ufrn.imd.incluevents.exceptions.ValidacaoJaCriadaException;
-import br.ufrn.imd.incluevents.exceptions.ValidacaoNotFoundException;
 import br.ufrn.imd.incluevents.model.Validacao;
 import br.ufrn.imd.incluevents.model.enums.TipoSeloEnum;
 import br.ufrn.imd.incluevents.service.ValidacaoService;
@@ -60,16 +56,10 @@ public class ValidacaoController {
             return ResponseEntity.status(HttpStatus.CREATED).body(validacao);
         } catch (EventoNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Evento não encontrado");
-        } catch (EstabelecimentoNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Estabelecimento não encontrado");
-        } catch (SeloJaValidadoException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Selo já validado");
         } catch (UsuarioNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
-        } catch (TipoSeloInvalidoException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Tipo de selo inválido");
-        } catch (ValidacaoJaCriadaException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Validação já foi criada para esse selo neste evento");
+        } catch (BusinessException e) {
+            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Erro ao criar validação", e);
 
@@ -83,8 +73,8 @@ public class ValidacaoController {
             Validacao validacao = validacaoService.getById(id);
 
             return ResponseEntity.status(HttpStatus.OK).body(validacao);
-        } catch (ValidacaoNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Validação não encontrada");
+        } catch (BusinessException e) {
+            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Erro ao recuperar validação", e);
 
@@ -140,8 +130,8 @@ public class ValidacaoController {
                     })
                     .collect(Collectors.toList())
             );
-        } catch (EstabelecimentoNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Estabelecimento não encontrado");
+        } catch (BusinessException e) {
+            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
         } catch (UsuarioNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
         } catch (Exception e) {

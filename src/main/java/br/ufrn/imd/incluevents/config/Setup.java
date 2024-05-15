@@ -30,19 +30,19 @@ public class Setup implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        //List<Evento> eventos = outgoScraper.scrape();
-        //System.out.println("Eventos buscados: ");
-        //eventos.forEach(System.out::println);
-        //this.eventoService.saveAll(eventos);
-
-        //List<Evento> eventosSimpla = SymplaScraperImpl.scrape();
-        //System.out.println("Eventos buscados: ");
-        //eventosSimpla.forEach(System.out::println);
-        //this.eventoService.saveAll(eventosSimpla);
-
-        //List<Evento> ingresseEventos = ingresseScraper.scrape();
-        //System.out.println("Eventos Ingresse buscados: ");
-        //ingresseEventos.forEach(System.out::println);
-        //this.eventoService.saveAll(ingresseEventos);
+//        List<Evento> eventos = outgoScraper.scrape();
+//        System.out.println("Eventos buscados: ");
+//        eventos.forEach(System.out::println);
+//        this.eventoService.saveAll(eventos);
+//
+//        List<Evento> eventosSimpla = SymplaScraperImpl.scrape();
+//        System.out.println("Eventos buscados: ");
+//        eventosSimpla.forEach(System.out::println);
+//        this.eventoService.saveAll(eventosSimpla);
+//
+//        List<Evento> ingresseEventos = ingresseScraper.scrape();
+//        System.out.println("Eventos Ingresse buscados: ");
+//        ingresseEventos.forEach(System.out::println);
+//        this.eventoService.saveAll(ingresseEventos);
     }
 }

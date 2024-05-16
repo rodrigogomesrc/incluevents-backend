@@ -1,14 +1,15 @@
 package br.ufrn.imd.incluevents.controller.component;
 
-import br.ufrn.imd.incluevents.exceptions.UsuarioNotFoundException;
+import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.service.TokenService;
-import br.ufrn.imd.incluevents.repository.UsuarioRepository;
 import br.ufrn.imd.incluevents.service.UsuarioService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -32,14 +33,13 @@ public class SecurityFilter extends OncePerRequestFilter {
         var token = recoverToken(request);
 
         if (token != null) {
-            String username = tokenService.validateToken(token);
             try {
+                String username = tokenService.validateToken(token);
                 Usuario usuario = usuarioService.getUsuarioByUsername(username);
                 var authentication = new UsernamePasswordAuthenticationToken(usuario, null, null);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            } catch (UsuarioNotFoundException e) {
-                throw new RuntimeException(e);
+            }catch (BusinessException e){
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
             }
         }
         filterChain.doFilter(request, response);

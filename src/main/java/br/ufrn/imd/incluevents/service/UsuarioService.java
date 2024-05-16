@@ -2,13 +2,12 @@ package br.ufrn.imd.incluevents.service;
 
 import br.ufrn.imd.incluevents.dto.CreateUsuarioDto;
 import br.ufrn.imd.incluevents.dto.UpdateUsuarioDto;
-import br.ufrn.imd.incluevents.exceptions.BusinessException;
-import br.ufrn.imd.incluevents.exceptions.UsuarioEmailJaExisteException;
-import br.ufrn.imd.incluevents.exceptions.UsuarioNotFoundException;
-import br.ufrn.imd.incluevents.exceptions.UsuarioUsernameJaExiste;
+import br.ufrn.imd.incluevents.exceptions.*;
 import br.ufrn.imd.incluevents.exceptions.enums.ExceptionTypesEnum;
 import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.repository.UsuarioRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,14 +23,17 @@ public class UsuarioService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public Usuario createUsuario(CreateUsuarioDto createUsuarioDto) throws UsuarioEmailJaExisteException, UsuarioUsernameJaExiste {
+    public Usuario createUsuario(CreateUsuarioDto createUsuarioDto) throws BusinessException {
 
-        if(usuarioRepository.findByEmail(createUsuarioDto.email()).isPresent()){
-            throw new UsuarioEmailJaExisteException();
+
+        if(createUsuarioDto.email() == null || createUsuarioDto.nome() == null || createUsuarioDto.username() == null || createUsuarioDto.senha() == null){
+            throw new BusinessException("Deve ter nome, email, username e senha para o cadastro", ExceptionTypesEnum.BAD_REQUEST);
         }
-
+        if(usuarioRepository.findByEmail(createUsuarioDto.email()).isPresent()){
+            throw new BusinessException("Esse email já existe", ExceptionTypesEnum.BAD_REQUEST);
+        }
         if(usuarioRepository.findByUsername(createUsuarioDto.username()) != null){
-            throw new UsuarioUsernameJaExiste();
+            throw new BusinessException("Esse username já existe", ExceptionTypesEnum.BAD_REQUEST);
         }
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(createUsuarioDto.senha());
@@ -46,36 +48,47 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
-    public Usuario getUsuarioById(int id) throws UsuarioNotFoundException {
+    public Usuario getUsuarioById(int id) throws BusinessException {
 
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
         if(!usuarioOptional.isPresent()){
-            throw new UsuarioNotFoundException();
+            throw new BusinessException("Usuário não encontrado com o id: " + id, ExceptionTypesEnum.NOT_FOUND);
         }
+
         return usuarioOptional.get();
     }
 
-    public Usuario getUsuarioByUsername(String username) throws UsuarioNotFoundException {
+    public Usuario getUsuarioByUsername(String username) throws BusinessException {
 
         Usuario usuario = (Usuario) usuarioRepository.findByUsername(username);
         if(usuario == null){
-            throw new UsuarioNotFoundException();
+            throw new BusinessException("Usuário não encontrado com o username: " + username, ExceptionTypesEnum.NOT_FOUND);
         }
         return usuario;
     }
 
-    public List<Usuario> getUsuarios() throws UsuarioNotFoundException {
+    public List<Usuario> getUsuarios() throws BusinessException {
 
         List<Usuario> usuarios = usuarioRepository.findAll();
 
         if(usuarios.isEmpty()){
-            throw new UsuarioNotFoundException();
+            throw new BusinessException("Nenhum Usuário foi encontrado.", ExceptionTypesEnum.NOT_FOUND);
         }
         return usuarios;
     }
-    public void updateUserById(int id, UpdateUsuarioDto updateUsuarioDto) throws UsuarioNotFoundException {
+    public void updateUserById(int id, UpdateUsuarioDto updateUsuarioDto) throws BusinessException {
 
-        Usuario usuario = usuarioRepository.findById(id).orElseThrow(UsuarioNotFoundException::new);
+        if(updateUsuarioDto.reputacao() != null && updateUsuarioDto.reputacao() < 0){
+            throw new BusinessException("O valor para o parâmetro reputação é inválido.", ExceptionTypesEnum.BAD_REQUEST);
+        }
+
+        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
+
+        if(!usuarioOptional.isPresent()){
+            throw new BusinessException("Usuário não encontrado com o id: " + id, ExceptionTypesEnum.NOT_FOUND);
+        }
+
+        Usuario usuario = usuarioOptional.get();
 
         if (updateUsuarioDto.nome() != null) {
             usuario.setNome(updateUsuarioDto.nome());
@@ -96,12 +109,12 @@ public class UsuarioService {
 
         usuarioRepository.save(usuario);
     }
-
-    public void deleteUsuarioById(int id)  throws UsuarioNotFoundException {
+      
+    public void deleteUsuarioById(int id) throws BusinessException {
         var usuarioExists = usuarioRepository.existsById(id);
 
         if (!usuarioExists) {
-            throw new UsuarioNotFoundException();
+            throw new BusinessException("Usuário não encontrado com o id: " + id, ExceptionTypesEnum.NOT_FOUND);
         }
         usuarioRepository.deleteById(id);
     }

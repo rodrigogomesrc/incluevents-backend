@@ -2,6 +2,7 @@ package br.ufrn.imd.incluevents.controller;
 
 import br.ufrn.imd.incluevents.dto.AuthenticationUsuarioDto;
 import br.ufrn.imd.incluevents.dto.LoginResponseDto;
+import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.service.TokenService;
 import jakarta.validation.Valid;
@@ -39,8 +40,8 @@ public class AuthenticationController {
 
         }catch (AuthenticationException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Credenciais para login inválidas");
-        }catch (RuntimeException e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao gerar token");
+        } catch(BusinessException e){
+            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
         }catch (Exception e){
             logger.error("Erro ao fazer login", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao fazer login");

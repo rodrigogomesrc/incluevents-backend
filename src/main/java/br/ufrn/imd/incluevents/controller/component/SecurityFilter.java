@@ -8,6 +8,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -37,9 +39,8 @@ public class SecurityFilter extends OncePerRequestFilter {
                 var authentication = new UsernamePasswordAuthenticationToken(usuario, null, null);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }catch (BusinessException e){
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
             }
-
         }
         filterChain.doFilter(request, response);
     }

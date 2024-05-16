@@ -23,7 +23,7 @@ public class Selo {
 
     @JsonIgnore
     @OneToMany(mappedBy = "selo")
-    private Set<Validacao> validacoes;
+    private Set<VotacaoSelo> validacoes;
 
     @ManyToOne
     @JoinColumn(name = "id_estabelecimento")
@@ -62,11 +62,11 @@ public class Selo {
         this.validado = validado;
     }
 
-    public Set<Validacao> getValidacoes() {
+    public Set<VotacaoSelo> getValidacoes() {
         return validacoes;
     }
 
-    public void setValidacoes(Set<Validacao> validacoes) {
+    public void setValidacoes(Set<VotacaoSelo> validacoes) {
         this.validacoes = validacoes;
     }
 

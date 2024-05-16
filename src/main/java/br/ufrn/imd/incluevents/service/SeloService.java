@@ -69,4 +69,18 @@ public class SeloService {
             new BusinessException("Selo não encontrado", ExceptionTypesEnum.NOT_FOUND)
         );
     }
+
+    public void validateSeloById(Integer idSelo) throws BusinessException {
+        if (idSelo == null || idSelo < 0) {
+            throw new BusinessException("Id do selo inválido", ExceptionTypesEnum.BAD_REQUEST);
+        }
+
+        Selo selo = seloRepository.findById(idSelo).orElseThrow(() ->
+            new BusinessException("Selo não encontrado", ExceptionTypesEnum.NOT_FOUND)
+        );
+
+        selo.setValidado(true);
+
+        seloRepository.save(selo);
+    }
 }

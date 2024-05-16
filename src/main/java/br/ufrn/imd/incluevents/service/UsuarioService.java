@@ -2,9 +2,11 @@ package br.ufrn.imd.incluevents.service;
 
 import br.ufrn.imd.incluevents.dto.CreateUsuarioDto;
 import br.ufrn.imd.incluevents.dto.UpdateUsuarioDto;
+import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.exceptions.UsuarioEmailJaExisteException;
 import br.ufrn.imd.incluevents.exceptions.UsuarioNotFoundException;
 import br.ufrn.imd.incluevents.exceptions.UsuarioUsernameJaExiste;
+import br.ufrn.imd.incluevents.exceptions.enums.ExceptionTypesEnum;
 import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.repository.UsuarioRepository;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,7 +41,7 @@ public class UsuarioService {
         usuario.setUsername(createUsuarioDto.username());
         usuario.setEmail(createUsuarioDto.email());
         usuario.setSenha(encryptedPassword);
-        usuario.setReputacao(1);
+        usuario.setReputacao(50);
 
         return usuarioRepository.save(usuario);
     }
@@ -93,9 +95,8 @@ public class UsuarioService {
         }
 
         usuarioRepository.save(usuario);
-
-
     }
+
     public void deleteUsuarioById(int id)  throws UsuarioNotFoundException {
         var usuarioExists = usuarioRepository.existsById(id);
 
@@ -105,4 +106,21 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
+    public void updateReputacaoById(Integer id, Integer reputacao) throws BusinessException {
+        if (id == null || id < 0) {
+            throw new BusinessException("Id do usuário inválido", ExceptionTypesEnum.BAD_REQUEST);
+        }
+
+        if (reputacao == null) {
+            reputacao = 50;
+        }
+
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(() ->
+            new BusinessException("Usuário não encontrado", ExceptionTypesEnum.NOT_FOUND)
+        );
+
+        usuario.setReputacao(Math.min(500, Math.max(0, reputacao)));
+
+        usuarioRepository.save(usuario);
+    }
 }

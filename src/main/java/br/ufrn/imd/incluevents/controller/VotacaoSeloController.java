@@ -16,13 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 import br.ufrn.imd.incluevents.dto.CreateVotacaoSeloDto;
 import br.ufrn.imd.incluevents.dto.ValidateVotacaoDto;
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
-import br.ufrn.imd.incluevents.exceptions.EventoNotFoundException;
-import br.ufrn.imd.incluevents.exceptions.UsuarioNotFoundException;
-import br.ufrn.imd.incluevents.model.GrupoVotacaoSelo;
+import br.ufrn.imd.incluevents.model.EstabelecimentoGrupoVotacaoSelo;
+import br.ufrn.imd.incluevents.model.EventoGrupoVotacaoSelo;
+import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.model.VotacaoSelo;
 import br.ufrn.imd.incluevents.model.enums.TipoSeloEnum;
 import br.ufrn.imd.incluevents.service.VotacaoSeloService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,23 +44,11 @@ public class VotacaoSeloController {
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CreateVotacaoSeloDto createVotacaoSeloDto) {
         try {
-            if (createVotacaoSeloDto.idEstabelecimento() == null && createVotacaoSeloDto.idEvento() == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deve ter idEvento ou idEstabelecimento");
-            } else if (createVotacaoSeloDto.idEstabelecimento() != null && createVotacaoSeloDto.idEvento() != null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deve ter apenas idEvento ou idEstabelecimento");
-            } else if (createVotacaoSeloDto.idUsuario() == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deve ter idUsuario");
-            } else if (createVotacaoSeloDto.tipoSelo() == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deve ter tipoSelo");
-            }
+            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
 
-            VotacaoSelo votacaoSelo = votacaoSeloService.create(createVotacaoSeloDto);
+            VotacaoSelo votacaoSelo = votacaoSeloService.create(createVotacaoSeloDto, usuario);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(votacaoSelo);
-        } catch (EventoNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Evento não encontrado");
-        } catch (UsuarioNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
         } catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
         } catch (Exception e) {
@@ -85,13 +74,14 @@ public class VotacaoSeloController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getByIdUsuario(@RequestParam int idUsuario) {
+    public ResponseEntity<?> getByUsuario() {
+
         try {
-            List<VotacaoSelo> validacoes = votacaoSeloService.getByUsuario(idUsuario);
+            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
+
+            List<VotacaoSelo> validacoes = votacaoSeloService.getByUsuario(usuario);
 
             return ResponseEntity.status(HttpStatus.OK).body(validacoes);
-        } catch (UsuarioNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
         } catch (Exception e) {
             logger.error("Erro ao recuperar votações de selo", e);
 
@@ -101,20 +91,15 @@ public class VotacaoSeloController {
 
     @GetMapping("/disponiveis")
     public ResponseEntity<?> getTiposSeloDisponiveis(
-        @RequestParam int idUsuario,
         @RequestParam(required = false) Integer idEstabelecimento,
         @RequestParam(required = false) Integer idEvento
     ) {
         try {
-            if (idEstabelecimento == null && idEvento == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deve ter idEvento ou idEstabelecimento");
-            } else if (idEstabelecimento != null && idEvento != null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deve ter apenas idEvento ou idEstabelecimento");
-            }
+            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
 
             List<TipoSeloEnum> tiposSelo = idEvento != null
-                ? votacaoSeloService.getDisponiveisByEvento(idUsuario, idEvento)
-                : votacaoSeloService.getDisponiveisByEstabelecimento(idUsuario, idEstabelecimento);
+                ? votacaoSeloService.getDisponiveisByEvento(idEvento, usuario)
+                : votacaoSeloService.getDisponiveisByEstabelecimento(idEstabelecimento, usuario);
 
             return ResponseEntity.status(HttpStatus.OK).body(
                 tiposSelo.stream()
@@ -134,8 +119,6 @@ public class VotacaoSeloController {
             );
         } catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
-        } catch (UsuarioNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
         } catch (Exception e) {
             logger.error("Erro ao recuperar tipos de selo disponíveis", e);
 
@@ -146,7 +129,12 @@ public class VotacaoSeloController {
     @GetMapping("/pendentes")
     public ResponseEntity<?> getValidacoesPendentes() {
         try {
-            List<GrupoVotacaoSelo> pendentes = votacaoSeloService.getValidacoesPendentes();
+            List<EventoGrupoVotacaoSelo> pendentesByEvento = votacaoSeloService.getValidacoesPendentesByEvento();
+            List<EstabelecimentoGrupoVotacaoSelo> pendentesByEstabelecimento = votacaoSeloService.getValidacoesPendentesByEstabelecimento();
+            List<Object> pendentes = new ArrayList<>();
+
+            pendentes.addAll(pendentesByEvento);
+            pendentes.addAll(pendentesByEstabelecimento);
 
             return ResponseEntity.status(HttpStatus.OK).body(pendentes);
         } catch (Exception e) {

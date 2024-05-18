@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import br.ufrn.imd.incluevents.model.GrupoVotacaoSelo;
 import br.ufrn.imd.incluevents.model.Selo;
@@ -20,16 +21,39 @@ public interface VotacaoSeloRepository extends JpaRepository<VotacaoSelo, Intege
 
   @Query(
     value =
-      "SELECT selo.id as idSelo,"
-      + " selo.tiposelo as tipoSelo,"
-      + " COUNT(validacao_selo.id) as totalEnvios,"
-      + " SUM(CASE WHEN validacao_selo.possuiSelo = TRUE THEN validacao_selo.score ELSE 0 END) as scorePositivo,"
-      + " SUM(CASE WHEN validacao_selo.possuiSelo = FALSE THEN validacao_selo.score ELSE 0 END) as scoreNegativo"
-      + " FROM selo"
-      + " INNER JOIN validacao_selo ON selo.id = validacao_selo.id_selo"
-      + " GROUP BY selo.id"
-      + " HAVING SUM(validacao_selo.score) >= 0",
-    nativeQuery = true
+      "SELECT new br.ufrn.imd.incluevents.model.GrupoVotacaoSelo("
+      + "  s,"
+      + "  SUM(vs.score),"
+      + "  COUNT(vs),"
+      + "  SUM(CASE WHEN possuiSelo = true THEN vs.score ELSE 0 END),"
+      + "  SUM(CASE WHEN possuiSelo = false THEN vs.score ELSE 0 END),"
+      + "  SUM(CASE WHEN possuiSelo = true THEN 1 ELSE 0 END),"
+      + "  SUM(CASE WHEN possuiSelo = false THEN 1 ELSE 0 END)"
+      + ") "
+      + "FROM Selo s "
+      + "INNER JOIN s.votacoesSelo vs "
+      + "WHERE s.evento.id = :idEvento AND s.validado = false AND vs.verificado = false "
+      + "GROUP BY s "
+      + "HAVING SUM(vs.score) >= 0"
   )
-  public List<GrupoVotacaoSelo> findValidacoesPendentes();
+  public List<GrupoVotacaoSelo> findValidacoesPendentesByEvento(@Param("idEvento") int idEvento);
+
+  @Query(
+    value =
+      "SELECT new br.ufrn.imd.incluevents.model.GrupoVotacaoSelo("
+      + "  s,"
+      + "  SUM(vs.score),"
+      + "  COUNT(vs),"
+      + "  SUM(CASE WHEN possuiSelo = true THEN vs.score ELSE 0 END),"
+      + "  SUM(CASE WHEN possuiSelo = false THEN vs.score ELSE 0 END),"
+      + "  SUM(CASE WHEN possuiSelo = true THEN 1 ELSE 0 END),"
+      + "  SUM(CASE WHEN possuiSelo = false THEN 1 ELSE 0 END)"
+      + ") "
+      + "FROM Selo s "
+      + "INNER JOIN s.votacoesSelo vs "
+      + "WHERE s.estabelecimento.id = :idEstabelecimento AND s.validado = false AND vs.verificado = false "
+      + "GROUP BY s "
+      + "HAVING SUM(vs.score) >= 0"
+  )
+  public List<GrupoVotacaoSelo> findValidacoesPendentesByEstabelecimento(@Param("idEstabelecimento") int idEstabelecimento);
 }

@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import java.util.Date;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "evento")
 public class Evento {
@@ -30,7 +32,8 @@ public class Evento {
             inverseJoinColumns = @JoinColumn(name = "categoria_id"))
     private Set<Categoria> categorias;
 
-    @OneToMany
+    @JsonIgnore
+    @OneToMany(mappedBy = "evento")
     private Set<Selo> selos;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)

@@ -11,6 +11,7 @@ import br.ufrn.imd.incluevents.repository.EstabelecimentoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.List;
 
 @Service
 public class EstabelecimentoService {
@@ -21,6 +22,10 @@ public class EstabelecimentoService {
     public EstabelecimentoService(EstabelecimentoRepository estabelecimentoRepository, SeloService seloService) {
         this.estabelecimentoRepository = estabelecimentoRepository;
         this.seloService = seloService;
+    }
+
+    public List<Estabelecimento> findAll() {
+        return this.estabelecimentoRepository.findAll();
     }
 
     public EstabelecimentoDto createEstabelecimento(CreateEstabelecimentoDto estabelecimento) throws BusinessException {

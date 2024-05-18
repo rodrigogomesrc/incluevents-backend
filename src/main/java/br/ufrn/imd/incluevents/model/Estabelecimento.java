@@ -20,7 +20,8 @@ public class Estabelecimento {
     @OneToMany(mappedBy = "estabelecimento", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Evento> eventos;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @JsonIgnore
+    @OneToMany(mappedBy = "estabelecimento", cascade = CascadeType.ALL)
     private Set<Selo> selos;
 
     public Estabelecimento(String nome, String endereco, String telefone) {

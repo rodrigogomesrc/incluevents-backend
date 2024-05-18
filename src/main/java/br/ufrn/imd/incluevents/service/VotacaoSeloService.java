@@ -173,7 +173,7 @@ public class VotacaoSeloService {
         );
     }
 
-    public List<VotacaoSelo> getByUsuario(Integer idUsuario) throws UsuarioNotFoundException {
+    public List<VotacaoSelo> getByUsuario(Integer idUsuario) throws UsuarioNotFoundException, BusinessException {
         Usuario usuario = usuarioService.getUsuarioById(idUsuario);
 
         return votacaoSeloRepository.findByUsuario(usuario);

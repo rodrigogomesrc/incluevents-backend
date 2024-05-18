@@ -58,9 +58,23 @@ public class EstabelecimentoService {
             throw new BusinessException("Id inválido", ExceptionTypesEnum.BAD_REQUEST);
         }
 
-        Optional<Estabelecimento> found = estabelecimentoRepository.findById(id);
+        return estabelecimentoRepository.findById(id);
 
-        return found;
+    }
+
+    public EstabelecimentoDto getById(int id) throws BusinessException {
+        if (id < 0) {
+            throw new BusinessException("Id inválido", ExceptionTypesEnum.BAD_REQUEST);
+        }
+
+        Optional<Estabelecimento> found =  estabelecimentoRepository.findById(id);
+        if (found.isEmpty()) {
+            throw new BusinessException("Estabelecimento não encontrado", ExceptionTypesEnum.NOT_FOUND);
+        }
+
+        Estabelecimento estabelecimento = found.get();
+        return new EstabelecimentoDto(estabelecimento.getId(), estabelecimento.getNome(),
+                estabelecimento.getEndereco(), estabelecimento.getTelefone(), estabelecimento.getSelos());
     }
 
     public EstabelecimentoDto addSeloToEstabelecimento(int estabelecimentoId, int seloId)

@@ -4,13 +4,10 @@ import br.ufrn.imd.incluevents.dto.CreateEstabelecimentoDto;
 import br.ufrn.imd.incluevents.dto.EstabelecimentoDto;
 import br.ufrn.imd.incluevents.dto.UpdateEstabelecimentoDto;
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
-import br.ufrn.imd.incluevents.model.Estabelecimento;
 import br.ufrn.imd.incluevents.service.EstabelecimentoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,29 +32,33 @@ public class EstabelecimentoController {
             return ResponseEntity.status(HttpStatus.CREATED).body(createdEstabelecimento);
         } catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Erro ao criar estabelecimento", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao criar estabelecimento");
         }
     }
 
     @PutMapping
     public ResponseEntity<?> updateEstabelecimento(@RequestBody UpdateEstabelecimentoDto estabelecimento) {
         try {
-            EstabelecimentoDto updatedEstabelecimento = estabelecimentoService.updateEstabelecimento(estabelecimento);
-            return ResponseEntity.ok().body(updatedEstabelecimento);
+            return ResponseEntity.ok().body(estabelecimentoService.updateEstabelecimento(estabelecimento));
         } catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Erro ao atualizar estabelecimento", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao atualizar estabelecimento");
         }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getEstabelecimentoById(@PathVariable("id") int id) {
         try {
-            Optional<Estabelecimento> estabelecimentoOptional = estabelecimentoService.getEstabelecimentoById(id);
-            if (estabelecimentoOptional.isPresent()) {
-                return ResponseEntity.ok().body(estabelecimentoOptional.get());
-            }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Estabelecimento não encontrado com o id: " + id);
+            return ResponseEntity.ok().body(estabelecimentoService.getById(id));
         } catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Erro ao buscar estabelecimento", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar estabelecimento");
         }
     }
 
@@ -70,6 +71,9 @@ public class EstabelecimentoController {
             return ResponseEntity.ok().body(estabelecimento);
         }  catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Erro ao adicionar selo ao estabelecimento", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao adicionar selo ao estabelecimento");
         }
     }
 
@@ -80,8 +84,11 @@ public class EstabelecimentoController {
         try {
             EstabelecimentoDto estabelecimento = estabelecimentoService.removeSeloFromEstabelecimento(estabelecimentoId, seloId);
             return ResponseEntity.ok().body(estabelecimento);
-        }  catch (BusinessException e) {
+        } catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Erro ao remover selo do estabelecimento", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao remover selo do estabelecimento");
         }
     }
 
@@ -92,6 +99,9 @@ public class EstabelecimentoController {
             return ResponseEntity.ok().body("Estabelecimento deletado com sucesso");
         } catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Erro ao deletar estabelecimento", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao deletar estabelecimento");
         }
     }
 

@@ -30,6 +30,7 @@ public class SeloController {
             Selo createdSelo = seloService.save(selo);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdSelo);
         } catch (BusinessException e) {
+            logger.error("Erro ao criar selo", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
@@ -40,6 +41,7 @@ public class SeloController {
             Selo selo = seloService.getById(id);
             return ResponseEntity.ok().body(selo);
         } catch (BusinessException e) {
+            logger.error("Erro ao buscar selo", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
@@ -51,6 +53,7 @@ public class SeloController {
             Selo updatedSelo = seloService.update(selo);
             return ResponseEntity.ok().body(updatedSelo);
         } catch (BusinessException e) {
+            logger.error("Erro ao atualizar selo", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
@@ -61,6 +64,7 @@ public class SeloController {
             seloService.deleteById(id);
             return ResponseEntity.noContent().build();
         } catch (BusinessException e) {
+            logger.error("Erro ao deletar selo", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
@@ -71,6 +75,7 @@ public class SeloController {
             List<Selo> selos = seloService.findAll();
             return ResponseEntity.ok().body(selos);
         } catch (BusinessException e) {
+            logger.error("Erro ao buscar selos", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }

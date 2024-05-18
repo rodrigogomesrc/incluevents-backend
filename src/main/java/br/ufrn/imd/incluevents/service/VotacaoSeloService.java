@@ -209,7 +209,7 @@ public class VotacaoSeloService {
                 } else if (selo.getValidado()) {
                     return false;
                 } else {
-                    return !votacaoSeloRepository.findByUsuarioAndSelo(usuario, selo).isPresent();
+                    return votacaoSeloRepository.findByUsuarioAndSelo(usuario, selo).isEmpty();
                 }
             })
             .collect(Collectors.toList());
@@ -244,7 +244,7 @@ public class VotacaoSeloService {
                 } else if (selo.getValidado()) {
                     return false;
                 } else {
-                    return !votacaoSeloRepository.findByUsuarioAndSelo(usuario, selo).isPresent();
+                    return votacaoSeloRepository.findByUsuarioAndSelo(usuario, selo).isEmpty();
                 }
             })
             .collect(Collectors.toList());

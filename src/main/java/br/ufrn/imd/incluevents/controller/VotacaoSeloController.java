@@ -156,7 +156,7 @@ public class VotacaoSeloController {
         }
     }
 
-    @PostMapping("/valida")
+    @PostMapping("/validar")
     public ResponseEntity<?> validate(@RequestBody ValidateVotacaoDto validateVotacaoDto) {
         try {
             votacaoSeloService.validateVotacao(validateVotacaoDto);

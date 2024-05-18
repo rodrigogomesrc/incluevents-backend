@@ -13,13 +13,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.ufrn.imd.incluevents.dto.CreateValidacaoDto;
+import br.ufrn.imd.incluevents.dto.CreateVotacaoSeloDto;
+import br.ufrn.imd.incluevents.dto.ValidateVotacaoDto;
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.exceptions.EventoNotFoundException;
 import br.ufrn.imd.incluevents.exceptions.UsuarioNotFoundException;
-import br.ufrn.imd.incluevents.model.Validacao;
+import br.ufrn.imd.incluevents.model.GrupoVotacaoSelo;
+import br.ufrn.imd.incluevents.model.VotacaoSelo;
 import br.ufrn.imd.incluevents.model.enums.TipoSeloEnum;
-import br.ufrn.imd.incluevents.service.ValidacaoService;
+import br.ufrn.imd.incluevents.service.VotacaoSeloService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,33 +29,33 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("validacoes")
+@RequestMapping("votacoes-selo")
 @CrossOrigin(origins = "http://localhost:3000")
-public class ValidacaoController {
-    private final ValidacaoService validacaoService;
+public class VotacaoSeloController {
+    private final VotacaoSeloService votacaoSeloService;
 
-    private static final Logger logger = LoggerFactory.getLogger(ValidacaoController.class);
+    private static final Logger logger = LoggerFactory.getLogger(VotacaoSeloController.class);
 
-    public ValidacaoController(ValidacaoService validacaoService) {
-        this.validacaoService = validacaoService;
+    public VotacaoSeloController(VotacaoSeloService votacaoSeloService) {
+        this.votacaoSeloService = votacaoSeloService;
     }
 
     @PostMapping
-    public ResponseEntity<?> createValidacao(@RequestBody CreateValidacaoDto createValidacaoDto) {
+    public ResponseEntity<?> create(@RequestBody CreateVotacaoSeloDto createVotacaoSeloDto) {
         try {
-            if (createValidacaoDto.idEstabelecimento() == null && createValidacaoDto.idEvento() == null) {
+            if (createVotacaoSeloDto.idEstabelecimento() == null && createVotacaoSeloDto.idEvento() == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deve ter idEvento ou idEstabelecimento");
-            } else if (createValidacaoDto.idEstabelecimento() != null && createValidacaoDto.idEvento() != null) {
+            } else if (createVotacaoSeloDto.idEstabelecimento() != null && createVotacaoSeloDto.idEvento() != null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deve ter apenas idEvento ou idEstabelecimento");
-            } else if (createValidacaoDto.idUsuario() == null) {
+            } else if (createVotacaoSeloDto.idUsuario() == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deve ter idUsuario");
-            } else if (createValidacaoDto.tipoSelo() == null) {
+            } else if (createVotacaoSeloDto.tipoSelo() == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deve ter tipoSelo");
             }
 
-            Validacao validacao = validacaoService.create(createValidacaoDto);
+            VotacaoSelo votacaoSelo = votacaoSeloService.create(createVotacaoSeloDto);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(validacao);
+            return ResponseEntity.status(HttpStatus.CREATED).body(votacaoSelo);
         } catch (EventoNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Evento não encontrado");
         } catch (UsuarioNotFoundException e) {
@@ -61,44 +63,44 @@ public class ValidacaoController {
         } catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
         } catch (Exception e) {
-            logger.error("Erro ao criar validação", e);
+            logger.error("Erro ao criar votação de selo", e);
 
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao criar validação");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao criar votação de selo");
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getValidacaoById(@PathVariable("id") int id) {
+    public ResponseEntity<?> getById(@PathVariable("id") int id) {
         try {
-            Validacao validacao = validacaoService.getById(id);
+            VotacaoSelo votacaoSelo = votacaoSeloService.getById(id);
 
-            return ResponseEntity.status(HttpStatus.OK).body(validacao);
+            return ResponseEntity.status(HttpStatus.OK).body(votacaoSelo);
         } catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
         } catch (Exception e) {
-            logger.error("Erro ao recuperar validação", e);
+            logger.error("Erro ao recuperar votação", e);
 
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao recuperar validação");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao recuperar votação");
         }
     }
 
     @GetMapping
-    public ResponseEntity<?> getValidacaoByIdUsuario(@RequestParam int idUsuario) {
+    public ResponseEntity<?> getByIdUsuario(@RequestParam int idUsuario) {
         try {
-            List<Validacao> validacoes = validacaoService.getByUsuario(idUsuario);
+            List<VotacaoSelo> validacoes = votacaoSeloService.getByUsuario(idUsuario);
 
             return ResponseEntity.status(HttpStatus.OK).body(validacoes);
         } catch (UsuarioNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado");
         } catch (Exception e) {
-            logger.error("Erro ao recuperar validações", e);
+            logger.error("Erro ao recuperar votações de selo", e);
 
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao recuperar validações");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao recuperar votações de selo");
         }
     }
 
     @GetMapping("/disponiveis")
-    public ResponseEntity<?> getValidacoesTiposSeloDisponiveis(
+    public ResponseEntity<?> getTiposSeloDisponiveis(
         @RequestParam int idUsuario,
         @RequestParam(required = false) Integer idEstabelecimento,
         @RequestParam(required = false) Integer idEvento
@@ -111,8 +113,8 @@ public class ValidacaoController {
             }
 
             List<TipoSeloEnum> tiposSelo = idEvento != null
-                ? validacaoService.getDisponiveisByEvento(idUsuario, idEvento)
-                : validacaoService.getDisponiveisByEstabelecimento(idUsuario, idEstabelecimento);
+                ? votacaoSeloService.getDisponiveisByEvento(idUsuario, idEvento)
+                : votacaoSeloService.getDisponiveisByEstabelecimento(idUsuario, idEstabelecimento);
 
             return ResponseEntity.status(HttpStatus.OK).body(
                 tiposSelo.stream()
@@ -138,6 +140,34 @@ public class ValidacaoController {
             logger.error("Erro ao recuperar tipos de selo disponíveis", e);
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao recuperar tipos de selo disponíveis");
+        }
+    }
+
+    @GetMapping("/pendentes")
+    public ResponseEntity<?> getValidacoesPendentes() {
+        try {
+            List<GrupoVotacaoSelo> pendentes = votacaoSeloService.getValidacoesPendentes();
+
+            return ResponseEntity.status(HttpStatus.OK).body(pendentes);
+        } catch (Exception e) {
+            logger.error("Erro ao recuperar selos com votações pendentes a serem validadas");
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao recuperar selos com validações pendentes a serem validadas");
+        }
+    }
+
+    @PostMapping("/valida")
+    public ResponseEntity<?> validate(@RequestBody ValidateVotacaoDto validateVotacaoDto) {
+        try {
+            votacaoSeloService.validateVotacao(validateVotacaoDto);
+
+            return ResponseEntity.status(HttpStatus.OK).body(null);
+        } catch (BusinessException e) {
+            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
+        } catch (Exception e) {
+            logger.error("Erro ao validar votações");
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao validar votações");
         }
     }
 }

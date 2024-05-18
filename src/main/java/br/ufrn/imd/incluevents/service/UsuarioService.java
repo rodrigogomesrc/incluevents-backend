@@ -43,7 +43,7 @@ public class UsuarioService {
         usuario.setUsername(createUsuarioDto.username());
         usuario.setEmail(createUsuarioDto.email());
         usuario.setSenha(encryptedPassword);
-        usuario.setReputacao(1);
+        usuario.setReputacao(50);
 
         return usuarioRepository.save(usuario);
     }
@@ -108,8 +108,8 @@ public class UsuarioService {
         }
 
         usuarioRepository.save(usuario);
-
     }
+      
     public void deleteUsuarioById(int id) throws BusinessException {
         var usuarioExists = usuarioRepository.existsById(id);
 
@@ -119,4 +119,21 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
+    public void updateReputacaoById(Integer id, Integer reputacao) throws BusinessException {
+        if (id == null || id < 0) {
+            throw new BusinessException("Id do usuário inválido", ExceptionTypesEnum.BAD_REQUEST);
+        }
+
+        if (reputacao == null) {
+            reputacao = 50;
+        }
+
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow(() ->
+            new BusinessException("Usuário não encontrado", ExceptionTypesEnum.NOT_FOUND)
+        );
+
+        usuario.setReputacao(Math.min(500, Math.max(0, reputacao)));
+
+        usuarioRepository.save(usuario);
+    }
 }

@@ -3,14 +3,16 @@ package br.ufrn.imd.incluevents.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "validacao")
-public class Validacao {
+@Table(name = "validacao_selo")
+public class VotacaoSelo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     private String descricao;
-    private int voto;
+    private boolean possuiSelo;
+    private int score;
+    private boolean verificado;
 
     @ManyToOne
     @JoinColumn(name = "id_usuario")
@@ -19,6 +21,7 @@ public class Validacao {
     @ManyToOne
     @JoinColumn(name = "id_selo")
     private Selo selo;
+
 
     public int getId() {
         return id;
@@ -36,12 +39,28 @@ public class Validacao {
         this.descricao = descricao;
     }
 
-    public int getVoto() {
-        return voto;
+    public boolean getPossuiSelo() {
+        return possuiSelo;
     }
 
-    public void setVoto(int voto) {
-        this.voto = voto;
+    public void setPossuiSelo(boolean possuiSelo) {
+        this.possuiSelo = possuiSelo;
+    }
+
+    public int getScore() {
+      return score;
+    }
+
+    public void setScore(int score) {
+      this.score = score;
+    }
+
+    public boolean getVerificado() {
+        return verificado;
+    }
+
+    public void setVerificado(boolean verificado) {
+        this.verificado = verificado;
     }
 
     public Usuario getUsuario() {

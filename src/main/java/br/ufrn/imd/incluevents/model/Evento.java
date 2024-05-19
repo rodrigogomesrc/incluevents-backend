@@ -40,7 +40,7 @@ public class Evento {
     @JoinColumn(name = "id_estabelecimento")
     private Estabelecimento estabelecimento;
 
-    @OneToMany(mappedBy = "evento")
+    @OneToMany(mappedBy = "evento", fetch = FetchType.EAGER)
     private Set<Feedback> feedbacks;
 
     public Integer getId() {

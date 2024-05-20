@@ -40,6 +40,10 @@ public class Evento {
     @JoinColumn(name = "id_estabelecimento")
     private Estabelecimento estabelecimento;
 
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_criador")
+    private Usuario criador;
+
     @OneToMany(mappedBy = "evento", fetch = FetchType.EAGER)
     private Set<Feedback> feedbacks;
 
@@ -145,6 +149,14 @@ public class Evento {
 
     public void setEstabelecimento(Estabelecimento estabelecimento) {
         this.estabelecimento = estabelecimento;
+    }
+
+    public Usuario getCriador() {
+        return criador;
+    }
+
+    public void setCriador(Usuario criador) {
+        this.criador = criador;
     }
 
     public Set<Feedback> getFeedbacks() {

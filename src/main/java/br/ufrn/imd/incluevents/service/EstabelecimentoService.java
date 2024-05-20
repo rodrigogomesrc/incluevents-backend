@@ -7,6 +7,7 @@ import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.exceptions.enums.ExceptionTypesEnum;
 import br.ufrn.imd.incluevents.model.Estabelecimento;
 import br.ufrn.imd.incluevents.model.Selo;
+import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.repository.EstabelecimentoRepository;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ public class EstabelecimentoService {
         return this.estabelecimentoRepository.findAll();
     }
 
-    public EstabelecimentoDto createEstabelecimento(CreateEstabelecimentoDto estabelecimento) throws BusinessException {
+    public EstabelecimentoDto createEstabelecimento(CreateEstabelecimentoDto estabelecimento, Usuario usuario) throws BusinessException {
         if (estabelecimento.nome().isEmpty() || estabelecimento.nome().equals(" ")) {
             throw new BusinessException("Nome inválido", ExceptionTypesEnum.BAD_REQUEST);
         }
@@ -37,6 +38,7 @@ public class EstabelecimentoService {
         newEstabelecimento.setNome(estabelecimento.nome());
         newEstabelecimento.setEndereco(estabelecimento.endereco());
         newEstabelecimento.setTelefone(estabelecimento.telefone());
+        newEstabelecimento.setCriador(usuario);
         Estabelecimento created = estabelecimentoRepository.save(newEstabelecimento);
         return new EstabelecimentoDto(created.getId(), created.getNome(),
                 created.getEndereco(), created.getTelefone(), created.getSelos());

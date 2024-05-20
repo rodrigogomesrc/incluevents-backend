@@ -24,6 +24,10 @@ public class Estabelecimento {
     @OneToMany(mappedBy = "estabelecimento", cascade = CascadeType.ALL)
     private Set<Selo> selos;
 
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_criador")
+    private Usuario criador;
+
     public Estabelecimento(String nome, String endereco, String telefone) {
         this.nome = nome;
         this.endereco = endereco;
@@ -80,5 +84,13 @@ public class Estabelecimento {
 
     public void setSelos(Set<Selo> selos) {
         this.selos = selos;
+    }
+
+    public Usuario getCriador() {
+        return criador;
+    }
+
+    public void setCriador(Usuario criador) {
+        this.criador = criador;
     }
 }

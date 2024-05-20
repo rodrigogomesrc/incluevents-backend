@@ -2,17 +2,24 @@ package br.ufrn.imd.incluevents.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import br.ufrn.imd.incluevents.dto.CreateDocumentacaoSeloDto;
 import br.ufrn.imd.incluevents.dto.CreateSeloDto;
+import br.ufrn.imd.incluevents.dto.EstabelecimentoDocumentacaoSeloDto;
+import br.ufrn.imd.incluevents.dto.EventoDocumentacoesSeloDto;
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.exceptions.enums.ExceptionTypesEnum;
 import br.ufrn.imd.incluevents.model.DocumentacaoSelo;
+import br.ufrn.imd.incluevents.model.Estabelecimento;
+import br.ufrn.imd.incluevents.model.Evento;
 import br.ufrn.imd.incluevents.model.Selo;
 import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.repository.DocumentacaoSeloRepository;
+import br.ufrn.imd.incluevents.repository.EstabelecimentoRepository;
+import br.ufrn.imd.incluevents.repository.EventoRepository;
 
 @Service
 public class DocumentacaoSeloService {
@@ -22,17 +29,24 @@ public class DocumentacaoSeloService {
     private final SeloService seloService;
     private final StorageService storageService;
 
+    private final EventoRepository eventoRepository;
+    private final EstabelecimentoRepository estabelecimentoRepository;
+
     public DocumentacaoSeloService(
         DocumentacaoSeloRepository documentacaoSeloRepository,
         UsuarioService usuarioService,
         SeloService seloService,
-        StorageService storageService
+        StorageService storageService,
+        EventoRepository eventoRepository,
+        EstabelecimentoRepository estabelecimentoRepository
     ) {
         this.documentacaoSeloRepository = documentacaoSeloRepository;
 
         this.usuarioService = usuarioService;
         this.seloService = seloService;
         this.storageService = storageService;
+        this.eventoRepository = eventoRepository;
+        this.estabelecimentoRepository = estabelecimentoRepository;
     }
 
     public void validate(CreateDocumentacaoSeloDto createDocumentacaoSeloDto) throws BusinessException {
@@ -59,6 +73,28 @@ public class DocumentacaoSeloService {
         Selo selo;
 
         validate(createDocumentacaoSeloDto);
+
+        if (createDocumentacaoSeloDto.idEvento() != null) {
+            Evento evento = eventoRepository.findById(createDocumentacaoSeloDto.idEvento()).orElseThrow(() ->
+                new BusinessException("Evento não encontrado", ExceptionTypesEnum.NOT_FOUND)
+            );
+
+            if (evento.getCriador() != null && evento.getCriador().getId() != usuario.getId()) {
+                throw new BusinessException("Apenas o criador do evento pode enviar a solicitação de documentação", null);
+            } else if (evento.getCriador() == null && usuario.getReputacao() < 70) {
+                throw new BusinessException("Reputação insuficiente para envio de documentação", null);
+            }
+        } else {
+            Estabelecimento estabelecimento = estabelecimentoRepository.findById(createDocumentacaoSeloDto.idEstabelecimento()).orElseThrow(() ->
+                new BusinessException("Estabelecimento não encontrado", ExceptionTypesEnum.NOT_FOUND)
+            );
+
+            if (estabelecimento.getCriador() != null && estabelecimento.getCriador().getId() != usuario.getId()) {
+                throw new BusinessException("Apenas o criador do evento pode enviar a solicitação de documentação", null);
+            } else if (estabelecimento.getCriador() == null && usuario.getReputacao() < 70) {
+                throw new BusinessException("Reputação insuficiente para envio de documentação", null);
+            }
+        }
 
         try {
             CreateSeloDto createSeloDto = new CreateSeloDto(createDocumentacaoSeloDto.tipoSelo(), createDocumentacaoSeloDto.idEvento(), createDocumentacaoSeloDto.idEstabelecimento());
@@ -100,5 +136,37 @@ public class DocumentacaoSeloService {
         Usuario usuario = usuarioService.getUsuarioById(idUsuario);
 
         return create(createDocumentacaoSeloDto, usuario, baseUrl);
+    }
+
+    public List<EventoDocumentacoesSeloDto> getPendentesByEvento() {
+        return eventoRepository
+            .findAll()
+            .stream()
+            .parallel()
+            .map(evento -> {
+                List<DocumentacaoSelo> documentacoesSelo = documentacaoSeloRepository.findValidacoesPendentesByEvento(evento.getId());
+
+                return new EventoDocumentacoesSeloDto(evento, documentacoesSelo);
+            })
+            .filter(eventoDocumentacoesSelo -> {
+                return eventoDocumentacoesSelo.documentacoesSelo().size() > 0;
+            })
+            .collect(Collectors.toList());
+    }
+
+    public List<EstabelecimentoDocumentacaoSeloDto> getPendentesByEstabelecimento() {
+        return estabelecimentoRepository
+            .findAll()
+            .stream()
+            .parallel()
+            .map(estabelecimento -> {
+                List<DocumentacaoSelo> documentacoesSelo = documentacaoSeloRepository.findValidacoesPendentesByEstabelecimento(estabelecimento.getId());
+
+                return new EstabelecimentoDocumentacaoSeloDto(estabelecimento, documentacoesSelo);
+            })
+            .filter(estabelecimentoDocumentacoesSelo -> {
+                return estabelecimentoDocumentacoesSelo.documentacoesSelo().size() > 0;
+            })
+            .collect(Collectors.toList());
     }
 }

@@ -279,6 +279,8 @@ public class VotacaoSeloService {
                 }
             });
 
-        seloService.validateSeloById(validateVotacaoDto.idSelo());
+        if (validateVotacaoDto.possuiSelo()) {
+            seloService.validateSeloById(validateVotacaoDto.idSelo());
+        }
     }
 }

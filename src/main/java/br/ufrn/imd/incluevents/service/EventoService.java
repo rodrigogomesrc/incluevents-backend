@@ -85,6 +85,13 @@ public class EventoService {
         return repository.findById(id).get();
     }
 
+    public List<Evento> getByName(String nome) throws BusinessException {
+        if (nome.isEmpty()) {
+            throw new BusinessException("Nome não pode ser vazio", ExceptionTypesEnum.BAD_REQUEST);
+        }
+        return repository.findByNomeContaining(nome);
+    }
+
     public Evento update(Evento evento) throws BusinessException {
         if (evento.getNome().isEmpty() || evento.getNome().equals(" ")) {
             throw new BusinessException("Nome do evento inválido", ExceptionTypesEnum.BAD_REQUEST);

@@ -51,6 +51,16 @@ public class EventoController {
         }
     }
 
+    @GetMapping("/txt={nome}")
+    public ResponseEntity<?> findEventoByNome(@PathVariable String nome) {
+        try {
+            List<Evento> eventos = service.getByName(nome);
+            return ResponseEntity.status(HttpStatus.OK).body(eventos);
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<?> updateEvento(@PathVariable Integer id, @RequestBody Evento evento) {
         evento.setId(id);

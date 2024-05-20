@@ -11,4 +11,5 @@ public interface EventoRepository extends JpaRepository<Evento, Integer> {
     @Query("SELECT e FROM Evento e WHERE e.urlOriginal IN :urls")
     List<Evento> findByUrlOriginals(List<String> urls);
 
+    List<Evento> findByNomeContaining(String nome);
 }

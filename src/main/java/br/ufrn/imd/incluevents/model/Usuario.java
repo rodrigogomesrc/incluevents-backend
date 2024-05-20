@@ -1,5 +1,6 @@
 package br.ufrn.imd.incluevents.model;
 
+import br.ufrn.imd.incluevents.model.enums.TipoUsuarioEnum;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +19,9 @@ public class Usuario implements UserDetails {
     private String username;
     private String senha;
     private int reputacao;
+
+    @Enumerated(EnumType.STRING)
+    private TipoUsuarioEnum tipo;
 
     public Usuario() {
     }
@@ -77,6 +81,14 @@ public class Usuario implements UserDetails {
 
     public String getUsername() {
         return username;
+    }
+
+    public TipoUsuarioEnum getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(TipoUsuarioEnum tipo) {
+        this.tipo = tipo;
     }
 
     @Override

@@ -5,20 +5,21 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "documentacao_selo")
 public class DocumentacaoSelo {
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Integer id;
-  private String nomeArquivo;
-  private Boolean valida;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer id;
+    private String nomeArquivo;
+	private String urlArquivo;
+    private Boolean valida;
 
 
-  @ManyToOne
-  @JoinColumn(name = "id_usuario")
-  private Usuario usuario;
+    @ManyToOne
+    @JoinColumn(name = "id_usuario")
+    private Usuario usuario;
 
-  @ManyToOne
-  @JoinColumn(name = "id_selo")
-  private Selo selo;
+    @ManyToOne
+    @JoinColumn(name = "id_selo")
+    private Selo selo;
 
 	public Integer getId() {
 		return this.id;
@@ -34,6 +35,14 @@ public class DocumentacaoSelo {
 
 	public void setNomeArquivo(String nomeArquivo) {
 		this.nomeArquivo = nomeArquivo;
+	}
+
+	public String getUrlArquivo() {
+		return urlArquivo;
+	}
+
+	public void setUrlArquivo(String urlArquivo) {
+		this.urlArquivo = urlArquivo;
 	}
 
 	public Usuario getUsuario() {
@@ -52,11 +61,11 @@ public class DocumentacaoSelo {
 		this.selo = selo;
 	}
 
-  public Boolean getValida() {
-    return valida;
-  }
+    public Boolean getValida() {
+        return valida;
+    }
 
-  public void setValida(Boolean valida) {
-    this.valida = valida;
-  }
+    public void setValida(Boolean valida) {
+        this.valida = valida;
+    }
 }

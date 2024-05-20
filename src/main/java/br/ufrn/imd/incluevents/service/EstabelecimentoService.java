@@ -58,15 +58,6 @@ public class EstabelecimentoService {
 
     }
 
-    public Optional<Estabelecimento> getEstabelecimentoById(int id) throws BusinessException {
-        if (id < 0) {
-            throw new BusinessException("Id inválido", ExceptionTypesEnum.BAD_REQUEST);
-        }
-
-        return estabelecimentoRepository.findById(id);
-
-    }
-
     public EstabelecimentoDto getById(int id) throws BusinessException {
         if (id < 0) {
             throw new BusinessException("Id inválido", ExceptionTypesEnum.BAD_REQUEST);

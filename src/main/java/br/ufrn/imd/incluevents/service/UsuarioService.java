@@ -6,9 +6,6 @@ import br.ufrn.imd.incluevents.exceptions.*;
 import br.ufrn.imd.incluevents.exceptions.enums.ExceptionTypesEnum;
 import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.repository.UsuarioRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +41,7 @@ public class UsuarioService {
         usuario.setEmail(createUsuarioDto.email());
         usuario.setSenha(encryptedPassword);
         usuario.setReputacao(50);
+        usuario.setTipo(createUsuarioDto.tipo());
 
         return usuarioRepository.save(usuario);
     }

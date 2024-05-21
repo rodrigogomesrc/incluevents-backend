@@ -65,36 +65,6 @@ public class EstabelecimentoController {
         }
     }
 
-    @PutMapping("/{estabelecimentoId}/selos/{seloId}")
-    public ResponseEntity<?> addSeloToEstabelecimento (
-            @PathVariable("estabelecimentoId") int estabelecimentoId,
-            @PathVariable("seloId") int seloId) {
-        try {
-            EstabelecimentoDto estabelecimento = estabelecimentoService.addSeloToEstabelecimento(estabelecimentoId, seloId);
-            return ResponseEntity.ok().body(estabelecimento);
-        }  catch (BusinessException e) {
-            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
-        } catch (Exception e) {
-            logger.error("Erro ao adicionar selo ao estabelecimento", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao adicionar selo ao estabelecimento");
-        }
-    }
-
-    @DeleteMapping("/{estabelecimentoId}/selos/{seloId}")
-    public ResponseEntity<?> removeSeloFromEstabelecimento (
-            @PathVariable("estabelecimentoId") int estabelecimentoId,
-            @PathVariable("seloId") int seloId) {
-        try {
-            EstabelecimentoDto estabelecimento = estabelecimentoService.removeSeloFromEstabelecimento(estabelecimentoId, seloId);
-            return ResponseEntity.ok().body(estabelecimento);
-        } catch (BusinessException e) {
-            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
-        } catch (Exception e) {
-            logger.error("Erro ao remover selo do estabelecimento", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao remover selo do estabelecimento");
-        }
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteEstabelecimento(@PathVariable("id") int id) {
         try {

@@ -107,7 +107,7 @@ public class UsuarioService {
 
         usuarioRepository.save(usuario);
     }
-      
+
     public void deleteUsuarioById(int id) throws BusinessException {
         var usuarioExists = usuarioRepository.existsById(id);
 
@@ -117,19 +117,7 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-    public void updateReputacaoById(Integer id, Integer reputacao) throws BusinessException {
-        if (id == null || id < 0) {
-            throw new BusinessException("Id do usuário inválido", ExceptionTypesEnum.BAD_REQUEST);
-        }
-
-        if (reputacao == null) {
-            reputacao = 50;
-        }
-
-        Usuario usuario = usuarioRepository.findById(id).orElseThrow(() ->
-            new BusinessException("Usuário não encontrado", ExceptionTypesEnum.NOT_FOUND)
-        );
-
+    public void updateReputacao(Usuario usuario, int reputacao) {
         usuario.setReputacao(Math.min(500, Math.max(0, reputacao)));
 
         usuarioRepository.save(usuario);

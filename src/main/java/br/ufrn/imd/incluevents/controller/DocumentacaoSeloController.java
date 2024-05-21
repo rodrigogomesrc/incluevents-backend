@@ -22,7 +22,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import br.ufrn.imd.incluevents.dto.CreateDocumentacaoSeloDto;
 import br.ufrn.imd.incluevents.dto.EstabelecimentoDocumentacaoSeloDto;
 import br.ufrn.imd.incluevents.dto.EventoDocumentacoesSeloDto;
-import br.ufrn.imd.incluevents.dto.ValidateDcoumentacaoDto;
+import br.ufrn.imd.incluevents.dto.ValidateDocumentacaoDto;
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.model.DocumentacaoSelo;
 import br.ufrn.imd.incluevents.model.Usuario;
@@ -103,14 +103,18 @@ public class DocumentacaoSeloController {
     @GetMapping("/pendentes")
     public ResponseEntity<?> getValidacoesPendentes() {
         try {
-            List<EventoDocumentacoesSeloDto> pendentesByEvento = documentacaoSeloService.getPendentesByEvento();
-            List<EstabelecimentoDocumentacaoSeloDto> pendentesByEstabelecimento = documentacaoSeloService.getPendentesByEstabelecimento();
+            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
+
+            List<EventoDocumentacoesSeloDto> pendentesByEvento = documentacaoSeloService.getValidacoesPendentesByEvento(usuario);
+            List<EstabelecimentoDocumentacaoSeloDto> pendentesByEstabelecimento = documentacaoSeloService.getValidacoesPendentesByEstabelecimento(usuario);
             List<Object> pendentes = new ArrayList<>();
 
             pendentes.addAll(pendentesByEvento);
             pendentes.addAll(pendentesByEstabelecimento);
 
             return ResponseEntity.status(HttpStatus.OK).body(pendentes);
+        } catch (BusinessException e) {
+            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Erro ao recuperar selos com documentações pendentes a serem validadas");
 
@@ -119,9 +123,11 @@ public class DocumentacaoSeloController {
     }
 
     @PostMapping("/valida")
-    public ResponseEntity<?> validate(@RequestBody ValidateDcoumentacaoDto validateDcoumentacaoDto) {
+    public ResponseEntity<?> validate(@RequestBody ValidateDocumentacaoDto validateDocumentacaoDto) {
         try {
-            documentacaoSeloService.validateDocumentacao(validateDcoumentacaoDto);
+            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
+
+            documentacaoSeloService.validateDocumentacao(validateDocumentacaoDto, usuario);
 
             return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (BusinessException e) {

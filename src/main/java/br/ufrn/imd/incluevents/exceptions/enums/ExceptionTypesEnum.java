@@ -2,5 +2,5 @@ package br.ufrn.imd.incluevents.exceptions.enums;
 
 
 public enum ExceptionTypesEnum {
-    NOT_FOUND, BAD_REQUEST, CONFLICT, UNEXPECTED
+    NOT_FOUND, BAD_REQUEST, CONFLICT, UNEXPECTED, FORBIDDEN
 }

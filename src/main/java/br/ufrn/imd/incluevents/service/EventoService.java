@@ -4,6 +4,7 @@ import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.exceptions.EventoNotFoundException;
 import br.ufrn.imd.incluevents.exceptions.enums.ExceptionTypesEnum;
 import br.ufrn.imd.incluevents.model.Evento;
+import br.ufrn.imd.incluevents.model.enums.OrigemEventoEnum;
 import br.ufrn.imd.incluevents.repository.EventoRepository;
 
 import org.springframework.data.domain.Page;
@@ -32,6 +33,8 @@ public class EventoService {
     }
 
     public Evento save(Evento evento) throws BusinessException {
+        evento.setOrigem(OrigemEventoEnum.CADASTRO);
+
         if (evento.getNome().isEmpty() || evento.getNome().equals(" ")) {
             throw new BusinessException("Nome do evento inválido", ExceptionTypesEnum.BAD_REQUEST);
         }

@@ -1,5 +1,6 @@
 package br.ufrn.imd.incluevents.controller;
 
+import br.ufrn.imd.incluevents.controller.component.GetUsuarioLogadoHelper;
 import br.ufrn.imd.incluevents.dto.CreateEstabelecimentoDto;
 import br.ufrn.imd.incluevents.dto.EstabelecimentoDto;
 import br.ufrn.imd.incluevents.dto.UpdateEstabelecimentoDto;
@@ -19,17 +20,19 @@ import org.slf4j.LoggerFactory;
 public class EstabelecimentoController {
 
     private final EstabelecimentoService estabelecimentoService;
+    private final GetUsuarioLogadoHelper getUsuarioLogadoHelper;
 
     private static final Logger logger = LoggerFactory.getLogger(EstabelecimentoController.class);
 
-    public EstabelecimentoController(EstabelecimentoService estabelecimentoService) {
+    public EstabelecimentoController(EstabelecimentoService estabelecimentoService, GetUsuarioLogadoHelper getUsuarioLogadoHelper) {
         this.estabelecimentoService = estabelecimentoService;
+        this.getUsuarioLogadoHelper = getUsuarioLogadoHelper;
     }
 
     @PostMapping
     public ResponseEntity<?> createEstabelecimento(@RequestBody CreateEstabelecimentoDto estabelecimento) {
         try {
-            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
+            Usuario usuario = getUsuarioLogadoHelper.getUsuarioLogado();
 
             EstabelecimentoDto createdEstabelecimento = estabelecimentoService.createEstabelecimento(estabelecimento, usuario);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdEstabelecimento);

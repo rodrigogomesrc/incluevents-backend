@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.ufrn.imd.incluevents.controller.component.GetUsuarioLogadoHelper;
 import br.ufrn.imd.incluevents.dto.CreateVotacaoSeloDto;
 import br.ufrn.imd.incluevents.dto.EstabelecimentoGrupoVotacaoSeloDto;
 import br.ufrn.imd.incluevents.dto.EventoGrupoVotacaoSeloDto;
@@ -33,17 +34,19 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "http://localhost:3000")
 public class VotacaoSeloController {
     private final VotacaoSeloService votacaoSeloService;
+    private final GetUsuarioLogadoHelper getUsuarioLogadoHelper;
 
     private static final Logger logger = LoggerFactory.getLogger(VotacaoSeloController.class);
 
-    public VotacaoSeloController(VotacaoSeloService votacaoSeloService) {
+    public VotacaoSeloController(VotacaoSeloService votacaoSeloService, GetUsuarioLogadoHelper getUsuarioLogadoHelper) {
         this.votacaoSeloService = votacaoSeloService;
+        this.getUsuarioLogadoHelper = getUsuarioLogadoHelper;
     }
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CreateVotacaoSeloDto createVotacaoSeloDto) {
         try {
-            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
+            Usuario usuario = getUsuarioLogadoHelper.getUsuarioLogado();
 
             VotacaoSelo votacaoSelo = votacaoSeloService.create(createVotacaoSeloDto, usuario);
 
@@ -63,7 +66,7 @@ public class VotacaoSeloController {
         @RequestParam(required = false) Integer idEvento
     ) {
         try {
-            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
+            Usuario usuario = getUsuarioLogadoHelper.getUsuarioLogado();
 
             List<TipoSeloEnum> tiposSelo = idEvento != null
                 ? votacaoSeloService.getDisponiveisByEvento(idEvento, usuario)
@@ -97,7 +100,7 @@ public class VotacaoSeloController {
     @GetMapping("/pendentes")
     public ResponseEntity<?> getValidacoesPendentes() {
         try {
-            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
+            Usuario usuario = getUsuarioLogadoHelper.getUsuarioLogado();
 
             List<EventoGrupoVotacaoSeloDto> pendentesByEvento = votacaoSeloService.getValidacoesPendentesByEvento(usuario);
             List<EstabelecimentoGrupoVotacaoSeloDto> pendentesByEstabelecimento = votacaoSeloService.getValidacoesPendentesByEstabelecimento(usuario);
@@ -119,7 +122,7 @@ public class VotacaoSeloController {
     @PostMapping("/validar")
     public ResponseEntity<?> validate(@RequestBody ValidateVotacaoDto validateVotacaoDto) {
         try {
-            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
+            Usuario usuario = getUsuarioLogadoHelper.getUsuarioLogado();
 
             votacaoSeloService.validateVotacao(validateVotacaoDto, usuario);
 

@@ -1,5 +1,6 @@
 package br.ufrn.imd.incluevents.controller;
 
+import br.ufrn.imd.incluevents.controller.component.GetUsuarioLogadoHelper;
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.model.Evento;
 import br.ufrn.imd.incluevents.model.Usuario;
@@ -17,9 +18,11 @@ import java.util.List;
 public class EventoController {
 
     private final EventoService service;
+    private final GetUsuarioLogadoHelper getUsuarioLogadoHelper;
 
-    public EventoController(EventoService service) {
+    public EventoController(EventoService service, GetUsuarioLogadoHelper getUsuarioLogadoHelper) {
         this.service = service;
+        this.getUsuarioLogadoHelper = getUsuarioLogadoHelper;
     }
 
     @GetMapping
@@ -35,7 +38,7 @@ public class EventoController {
     @PostMapping
     public ResponseEntity<?> createEvento(@RequestBody Evento evento) {
         try {
-            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
+            Usuario usuario = getUsuarioLogadoHelper.getUsuarioLogado();
 
             evento.setCriador(usuario);
 

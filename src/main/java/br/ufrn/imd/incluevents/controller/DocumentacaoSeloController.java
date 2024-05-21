@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import br.ufrn.imd.incluevents.controller.component.GetUsuarioLogadoHelper;
 import br.ufrn.imd.incluevents.dto.CreateDocumentacaoSeloDto;
 import br.ufrn.imd.incluevents.dto.EstabelecimentoDocumentacaoSeloDto;
 import br.ufrn.imd.incluevents.dto.EventoDocumentacoesSeloDto;
@@ -33,19 +34,19 @@ import br.ufrn.imd.incluevents.service.DocumentacaoSeloService;
 @RequestMapping("documentacoes-selo")
 public class DocumentacaoSeloController {
     private final DocumentacaoSeloService documentacaoSeloService;
+    private final GetUsuarioLogadoHelper getUsuarioLogadoHelper;
 
     private static final Logger logger = LoggerFactory.getLogger(DocumentacaoSeloController.class);
 
-    public DocumentacaoSeloController(DocumentacaoSeloService documentacaoSeloService) {
+    public DocumentacaoSeloController(DocumentacaoSeloService documentacaoSeloService, GetUsuarioLogadoHelper getUsuarioLogadoHelper) {
         this.documentacaoSeloService = documentacaoSeloService;
+        this.getUsuarioLogadoHelper = getUsuarioLogadoHelper;
     }
 
     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<?> create(CreateDocumentacaoSeloDto createDocumentacaoSeloDto) {
         try {
-            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
-
-            System.out.println(usuario);
+            Usuario usuario = getUsuarioLogadoHelper.getUsuarioLogado();
 
             DocumentacaoSelo documentacaoSelo = documentacaoSeloService.create(
                 createDocumentacaoSeloDto,
@@ -69,7 +70,7 @@ public class DocumentacaoSeloController {
         @RequestParam(required = false) Integer idEvento
     ) {
         try {
-            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
+            Usuario usuario = getUsuarioLogadoHelper.getUsuarioLogado();
 
             List<TipoSeloEnum> tiposSelo = idEvento != null
                 ? documentacaoSeloService.getDisponiveisByEvento(idEvento, usuario)
@@ -103,7 +104,7 @@ public class DocumentacaoSeloController {
     @GetMapping("/pendentes")
     public ResponseEntity<?> getValidacoesPendentes() {
         try {
-            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
+            Usuario usuario = getUsuarioLogadoHelper.getUsuarioLogado();
 
             List<EventoDocumentacoesSeloDto> pendentesByEvento = documentacaoSeloService.getValidacoesPendentesByEvento(usuario);
             List<EstabelecimentoDocumentacaoSeloDto> pendentesByEstabelecimento = documentacaoSeloService.getValidacoesPendentesByEstabelecimento(usuario);
@@ -125,7 +126,7 @@ public class DocumentacaoSeloController {
     @PostMapping("/valida")
     public ResponseEntity<?> validate(@RequestBody ValidateDocumentacaoDto validateDocumentacaoDto) {
         try {
-            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
+            Usuario usuario = getUsuarioLogadoHelper.getUsuarioLogado();
 
             documentacaoSeloService.validateDocumentacao(validateDocumentacaoDto, usuario);
 

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import br.ufrn.imd.incluevents.model.GrupoVotacaoSelo;
+import br.ufrn.imd.incluevents.dto.GrupoVotacaoSeloDto;
 import br.ufrn.imd.incluevents.model.Selo;
 import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.model.VotacaoSelo;
@@ -21,7 +21,7 @@ public interface VotacaoSeloRepository extends JpaRepository<VotacaoSelo, Intege
 
   @Query(
     value =
-      "SELECT new br.ufrn.imd.incluevents.model.GrupoVotacaoSelo("
+      "SELECT new br.ufrn.imd.incluevents.dto.GrupoVotacaoSeloDto("
       + "  s,"
       + "  SUM(vs.score),"
       + "  COUNT(vs),"
@@ -37,11 +37,11 @@ public interface VotacaoSeloRepository extends JpaRepository<VotacaoSelo, Intege
       + "HAVING SUM(vs.score) >= 500 "
       + "AND SUM(CASE WHEN possuiSelo = true THEN vs.score ELSE 0 END) / SUM(vs.score) >= 0.7"
   )
-  public List<GrupoVotacaoSelo> findValidacoesPendentesByEvento(@Param("idEvento") int idEvento);
+  public List<GrupoVotacaoSeloDto> findValidacoesPendentesByEvento(@Param("idEvento") int idEvento);
 
   @Query(
     value =
-      "SELECT new br.ufrn.imd.incluevents.model.GrupoVotacaoSelo("
+      "SELECT new br.ufrn.imd.incluevents.dto.GrupoVotacaoSeloDto("
       + "  s,"
       + "  SUM(vs.score),"
       + "  COUNT(vs),"
@@ -56,5 +56,5 @@ public interface VotacaoSeloRepository extends JpaRepository<VotacaoSelo, Intege
       + "GROUP BY s "
       + "HAVING SUM(vs.score) >= 0"
   )
-  public List<GrupoVotacaoSelo> findValidacoesPendentesByEstabelecimento(@Param("idEstabelecimento") int idEstabelecimento);
+  public List<GrupoVotacaoSeloDto> findValidacoesPendentesByEstabelecimento(@Param("idEstabelecimento") int idEstabelecimento);
 }

@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.ufrn.imd.incluevents.dto.CreateVotacaoSeloDto;
+import br.ufrn.imd.incluevents.dto.EstabelecimentoGrupoVotacaoSeloDto;
+import br.ufrn.imd.incluevents.dto.EventoGrupoVotacaoSeloDto;
 import br.ufrn.imd.incluevents.dto.ValidateVotacaoDto;
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
-import br.ufrn.imd.incluevents.model.EstabelecimentoGrupoVotacaoSelo;
-import br.ufrn.imd.incluevents.model.EventoGrupoVotacaoSelo;
 import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.model.VotacaoSelo;
 import br.ufrn.imd.incluevents.model.enums.TipoSeloEnum;
@@ -129,8 +129,8 @@ public class VotacaoSeloController {
     @GetMapping("/pendentes")
     public ResponseEntity<?> getValidacoesPendentes() {
         try {
-            List<EventoGrupoVotacaoSelo> pendentesByEvento = votacaoSeloService.getValidacoesPendentesByEvento();
-            List<EstabelecimentoGrupoVotacaoSelo> pendentesByEstabelecimento = votacaoSeloService.getValidacoesPendentesByEstabelecimento();
+            List<EventoGrupoVotacaoSeloDto> pendentesByEvento = votacaoSeloService.getValidacoesPendentesByEvento();
+            List<EstabelecimentoGrupoVotacaoSeloDto> pendentesByEstabelecimento = votacaoSeloService.getValidacoesPendentesByEstabelecimento();
             List<Object> pendentes = new ArrayList<>();
 
             pendentes.addAll(pendentesByEvento);

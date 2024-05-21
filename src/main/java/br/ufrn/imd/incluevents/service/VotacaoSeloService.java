@@ -9,16 +9,19 @@ import org.springframework.stereotype.Service;
 
 import br.ufrn.imd.incluevents.dto.CreateSeloDto;
 import br.ufrn.imd.incluevents.dto.CreateVotacaoSeloDto;
+import br.ufrn.imd.incluevents.dto.EstabelecimentoGrupoVotacaoSeloDto;
+import br.ufrn.imd.incluevents.dto.EventoGrupoVotacaoSeloDto;
+import br.ufrn.imd.incluevents.dto.GrupoVotacaoSeloDto;
 import br.ufrn.imd.incluevents.dto.ValidateVotacaoDto;
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.exceptions.enums.ExceptionTypesEnum;
-import br.ufrn.imd.incluevents.model.EstabelecimentoGrupoVotacaoSelo;
-import br.ufrn.imd.incluevents.model.EventoGrupoVotacaoSelo;
-import br.ufrn.imd.incluevents.model.GrupoVotacaoSelo;
 import br.ufrn.imd.incluevents.model.Selo;
 import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.model.VotacaoSelo;
 import br.ufrn.imd.incluevents.model.enums.TipoSeloEnum;
+import br.ufrn.imd.incluevents.repository.EstabelecimentoRepository;
+import br.ufrn.imd.incluevents.repository.EventoRepository;
+import br.ufrn.imd.incluevents.repository.UsuarioRepository;
 import br.ufrn.imd.incluevents.repository.VotacaoSeloRepository;
 import jakarta.transaction.Transactional;
 
@@ -26,24 +29,24 @@ import jakarta.transaction.Transactional;
 public class VotacaoSeloService {
     private final VotacaoSeloRepository votacaoSeloRepository;
 
-    private final UsuarioService usuarioService;
     private final SeloService seloService;
-    private final EventoService eventoService;
-    private final EstabelecimentoService estabelecimentoService;
+
+    private final UsuarioRepository usuarioRepository;
+    private final EventoRepository eventoRepository;
+    private final EstabelecimentoRepository estabelecimentoRepository;
 
     public VotacaoSeloService(
         VotacaoSeloRepository votacaoSeloRepository,
-        UsuarioService usuarioService,
         SeloService seloService,
-        EventoService eventoService,
-        EstabelecimentoService estabelecimentoService
+        UsuarioRepository usuarioRepository,
+        EventoRepository eventoRepository,
+        EstabelecimentoRepository estabelecimentoRepository
     ) {
         this.votacaoSeloRepository = votacaoSeloRepository;
-
-        this.usuarioService = usuarioService;
         this.seloService = seloService;
-        this.eventoService = eventoService;
-        this.estabelecimentoService = estabelecimentoService;
+        this.usuarioRepository = usuarioRepository;
+        this.eventoRepository = eventoRepository;
+        this.estabelecimentoRepository = estabelecimentoRepository;
     }
 
     private void validate(CreateVotacaoSeloDto createVotacaoSeloDto) throws BusinessException {
@@ -125,12 +128,6 @@ public class VotacaoSeloService {
         return votacaoSeloRepository.save(votacaoSelo);
     }
 
-    public VotacaoSelo create(CreateVotacaoSeloDto createVotacaoSeloDto, Integer idUsuario) throws BusinessException {
-        Usuario usuario = usuarioService.getUsuarioById(idUsuario);
-
-        return create(createVotacaoSeloDto, usuario);
-    }
-
     public VotacaoSelo getById(Integer id) throws BusinessException {
         return votacaoSeloRepository.findById(id).orElseThrow(() ->
             new BusinessException("Validação não encontrada", ExceptionTypesEnum.NOT_FOUND)
@@ -139,12 +136,6 @@ public class VotacaoSeloService {
 
     public List<VotacaoSelo> getByUsuario(Usuario usuario) {
         return votacaoSeloRepository.findByUsuario(usuario);
-    }
-
-    public List<VotacaoSelo> getByUsuario(Integer idUsuario) throws BusinessException {
-        Usuario usuario = usuarioService.getUsuarioById(idUsuario);
-
-        return getByUsuario(usuario);
     }
 
     public List<TipoSeloEnum> getDisponiveisByEstabelecimento(Integer idEstabelecimento, Usuario usuario) throws
@@ -176,12 +167,6 @@ public class VotacaoSeloService {
             .collect(Collectors.toList());
     }
 
-    public List<TipoSeloEnum> getDisponiveisByEstabelecimento(Integer idEstabelecimento, Integer idUsuario) throws BusinessException {
-        Usuario usuario = usuarioService.getUsuarioById(idUsuario);
-
-        return getDisponiveisByEstabelecimento(idEstabelecimento, usuario);
-    }
-
     public List<TipoSeloEnum> getDisponiveisByEvento(Integer idEvento, Usuario usuario) throws
         BusinessException
     {
@@ -211,21 +196,15 @@ public class VotacaoSeloService {
             .collect(Collectors.toList());
     }
 
-    public List<TipoSeloEnum> getDisponiveisByEvento(Integer idEvento, Integer idUsuario) throws BusinessException {
-        Usuario usuario = usuarioService.getUsuarioById(idUsuario);
-
-        return getDisponiveisByEvento(idEvento, usuario);
-    }
-
-    public List<EventoGrupoVotacaoSelo> getValidacoesPendentesByEvento() {
-        return eventoService
+    public List<EventoGrupoVotacaoSeloDto> getValidacoesPendentesByEvento() {
+        return eventoRepository
             .findAll()
             .stream()
             .parallel()
             .map(evento -> {
-                List<GrupoVotacaoSelo> gruposVotacaoSelo = votacaoSeloRepository.findValidacoesPendentesByEvento(evento.getId());
+                List<GrupoVotacaoSeloDto> gruposVotacaoSelo = votacaoSeloRepository.findValidacoesPendentesByEvento(evento.getId());
 
-                return new EventoGrupoVotacaoSelo(evento, gruposVotacaoSelo);
+                return new EventoGrupoVotacaoSeloDto(evento, gruposVotacaoSelo);
             })
             .filter(item -> {
                 return item.getGruposVotacaoSelo().size() > 0;
@@ -233,15 +212,15 @@ public class VotacaoSeloService {
             .collect(Collectors.toList());
     }
 
-    public List<EstabelecimentoGrupoVotacaoSelo> getValidacoesPendentesByEstabelecimento() {
-        return estabelecimentoService
+    public List<EstabelecimentoGrupoVotacaoSeloDto> getValidacoesPendentesByEstabelecimento() {
+        return estabelecimentoRepository
             .findAll()
             .stream()
             .parallel()
             .map(estabelecimento -> {
-                List<GrupoVotacaoSelo> gruposVotacaoSelo = votacaoSeloRepository.findValidacoesPendentesByEstabelecimento(estabelecimento.getId());
+                List<GrupoVotacaoSeloDto> gruposVotacaoSelo = votacaoSeloRepository.findValidacoesPendentesByEstabelecimento(estabelecimento.getId());
 
-                return new EstabelecimentoGrupoVotacaoSelo(estabelecimento, gruposVotacaoSelo);
+                return new EstabelecimentoGrupoVotacaoSeloDto(estabelecimento, gruposVotacaoSelo);
             })
             .filter(item -> {
                 return item.getGruposVotacaoSelo().size() > 0;
@@ -249,6 +228,7 @@ public class VotacaoSeloService {
             .collect(Collectors.toList());
     }
 
+    @Transactional
     public void validateVotacao(final ValidateVotacaoDto validateVotacaoDto) throws BusinessException {
         validate(validateVotacaoDto);
 
@@ -272,11 +252,11 @@ public class VotacaoSeloService {
 
                 int reputacao = votacaoSelo.getUsuario().getReputacao() + (votacaoSelo.getPossuiSelo() == validateVotacaoDto.possuiSelo() ? 5 : -3);
 
-                try {
-                    usuarioService.updateReputacaoById(votacaoSelo.getUsuario().getId(), reputacao);
-                } catch (BusinessException error) {
-                    return;
-                }
+                Usuario usuario = votacaoSelo.getUsuario();
+
+                usuario.setReputacao(reputacao);
+
+                usuarioRepository.save(usuario);
             });
 
         if (validateVotacaoDto.possuiSelo()) {

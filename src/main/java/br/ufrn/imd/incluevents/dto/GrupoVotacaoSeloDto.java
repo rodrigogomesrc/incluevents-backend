@@ -1,6 +1,8 @@
-package br.ufrn.imd.incluevents.model;
+package br.ufrn.imd.incluevents.dto;
 
-public class GrupoVotacaoSelo {
+import br.ufrn.imd.incluevents.model.Selo;
+
+public class GrupoVotacaoSeloDto {
   private Selo selo;
   private Long totalScore;
   private Long totalEnvios;
@@ -9,7 +11,7 @@ public class GrupoVotacaoSelo {
   private Long enviosPositivos;
   private Long enviosNegativos;
 
-  public GrupoVotacaoSelo(Selo selo, Long totalScore, Long totalEnvios, Long scorePositivo, Long scoreNegativo, Long enviosPositivos, Long enviosNegativos) {
+  public GrupoVotacaoSeloDto(Selo selo, Long totalScore, Long totalEnvios, Long scorePositivo, Long scoreNegativo, Long enviosPositivos, Long enviosNegativos) {
     this.selo = selo;
     this.totalScore = totalScore;
     this.totalEnvios = totalEnvios;

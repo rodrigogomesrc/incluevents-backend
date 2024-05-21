@@ -31,4 +31,5 @@ target/*
 .env
 docker/postgres
 postgres
-upload
+upload/*
+!upload/.gitkeep

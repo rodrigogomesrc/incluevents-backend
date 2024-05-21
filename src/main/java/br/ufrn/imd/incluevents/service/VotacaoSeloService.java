@@ -7,19 +7,21 @@ import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 
+import br.ufrn.imd.incluevents.dto.CreateSeloDto;
 import br.ufrn.imd.incluevents.dto.CreateVotacaoSeloDto;
+import br.ufrn.imd.incluevents.dto.EstabelecimentoGrupoVotacaoSeloDto;
+import br.ufrn.imd.incluevents.dto.EventoGrupoVotacaoSeloDto;
+import br.ufrn.imd.incluevents.dto.GrupoVotacaoSeloDto;
 import br.ufrn.imd.incluevents.dto.ValidateVotacaoDto;
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
-import br.ufrn.imd.incluevents.exceptions.EventoNotFoundException;
-import br.ufrn.imd.incluevents.exceptions.UsuarioNotFoundException;
 import br.ufrn.imd.incluevents.exceptions.enums.ExceptionTypesEnum;
-import br.ufrn.imd.incluevents.model.Estabelecimento;
-import br.ufrn.imd.incluevents.model.Evento;
-import br.ufrn.imd.incluevents.model.GrupoVotacaoSelo;
 import br.ufrn.imd.incluevents.model.Selo;
 import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.model.VotacaoSelo;
 import br.ufrn.imd.incluevents.model.enums.TipoSeloEnum;
+import br.ufrn.imd.incluevents.repository.EstabelecimentoRepository;
+import br.ufrn.imd.incluevents.repository.EventoRepository;
+import br.ufrn.imd.incluevents.repository.UsuarioRepository;
 import br.ufrn.imd.incluevents.repository.VotacaoSeloRepository;
 import jakarta.transaction.Transactional;
 
@@ -27,24 +29,44 @@ import jakarta.transaction.Transactional;
 public class VotacaoSeloService {
     private final VotacaoSeloRepository votacaoSeloRepository;
 
-    private final UsuarioService usuarioService;
     private final SeloService seloService;
-    private final EventoService eventoService;
-    private final EstabelecimentoService estabelecimentoService;
+
+    private final UsuarioRepository usuarioRepository;
+    private final EventoRepository eventoRepository;
+    private final EstabelecimentoRepository estabelecimentoRepository;
 
     public VotacaoSeloService(
         VotacaoSeloRepository votacaoSeloRepository,
-        UsuarioService usuarioService,
         SeloService seloService,
-        EventoService eventoService,
-        EstabelecimentoService estabelecimentoService
+        UsuarioRepository usuarioRepository,
+        EventoRepository eventoRepository,
+        EstabelecimentoRepository estabelecimentoRepository
     ) {
         this.votacaoSeloRepository = votacaoSeloRepository;
-
-        this.usuarioService = usuarioService;
         this.seloService = seloService;
-        this.eventoService = eventoService;
-        this.estabelecimentoService = estabelecimentoService;
+        this.usuarioRepository = usuarioRepository;
+        this.eventoRepository = eventoRepository;
+        this.estabelecimentoRepository = estabelecimentoRepository;
+    }
+
+    private void validate(CreateVotacaoSeloDto createVotacaoSeloDto) throws BusinessException {
+        List<String> errors = new ArrayList<>();
+
+        try {
+            CreateSeloDto createSeloDto = new CreateSeloDto(createVotacaoSeloDto.tipoSelo(), createVotacaoSeloDto.idEvento(), createVotacaoSeloDto.idEstabelecimento());
+
+            seloService.validate(createSeloDto);
+        } catch (BusinessException e) {
+            errors.add(e.getMessage());
+        }
+
+        if (createVotacaoSeloDto.possuiSelo() == null) {
+            errors.add("Deve ter campo possuiSelo");
+        }
+
+        if (errors.size() > 0) {
+            throw new BusinessException(String.join("\n", errors), ExceptionTypesEnum.BAD_REQUEST);
+        }
     }
 
     private void validate(ValidateVotacaoDto validateVotacaoDto) throws BusinessException {
@@ -63,94 +85,33 @@ public class VotacaoSeloService {
         }
     }
 
-    private void validate(CreateVotacaoSeloDto createVotacaoSeloDto) throws BusinessException {
-        List<String> errors = new ArrayList<>();
-
-        if (createVotacaoSeloDto.idEvento() == null && createVotacaoSeloDto.idEstabelecimento() == null) {
-            errors.add("Deve ter o campo idEvento ou idEstabelecimento");
-        } else if (createVotacaoSeloDto.idEvento() != null && createVotacaoSeloDto.idEstabelecimento() != null) {
-            errors.add("Deve ter apenas um dos campos idEvento ou idEstabelecimento");
-        } else if (createVotacaoSeloDto.idEstabelecimento() != null) {
-            if (createVotacaoSeloDto.idEstabelecimento() < 0) {
-                errors.add("Id do estabelecimento inválido");
-            }
-
-            if (!createVotacaoSeloDto.tipoSelo().getTipoEntidade().equals("ESTABELECIMENTO")) {
-                errors.add("Tipo do selo inválido");
-            }
-        } else if (createVotacaoSeloDto.idEvento() != null) {
-            if (createVotacaoSeloDto.idEvento() < 0) {
-                errors.add("Id do evento inválido");
-            }
-
-            if (!createVotacaoSeloDto.tipoSelo().getTipoEntidade().equals("EVENTO")) {
-                errors.add("Tipo do selo inválido");
-            }
-        }
-
-        if (createVotacaoSeloDto.idUsuario() == null) {
-            errors.add("Deve ter idUsuario");
-        }
-
-        if (createVotacaoSeloDto.tipoSelo() == null) {
-            errors.add("Deve ter campo tipoSelo");
-        }
-
-        if (createVotacaoSeloDto.possuiSelo() == null) {
-            errors.add("Deve ter campo possuiSelo");
-        }
-
-        if (errors.size() > 0) {
-            throw new BusinessException(String.join("\n", errors), ExceptionTypesEnum.BAD_REQUEST);
-        }
-    }
-
     @Transactional
-    public VotacaoSelo create(CreateVotacaoSeloDto createVotacaoSeloDto) throws
-        BusinessException,
-        UsuarioNotFoundException,
-        EventoNotFoundException
+    public VotacaoSelo create(CreateVotacaoSeloDto createVotacaoSeloDto, Usuario usuario) throws
+        BusinessException
     {
-        Evento evento = null;
-        Estabelecimento estabelecimento = null;
         Selo selo;
 
         validate(createVotacaoSeloDto);
 
-        if (createVotacaoSeloDto.idEvento() != null) {
-            evento = eventoService.getById(createVotacaoSeloDto.idEvento());
+        try {
+            CreateSeloDto createSeloDto = new CreateSeloDto(createVotacaoSeloDto.tipoSelo(), createVotacaoSeloDto.idEvento(), createVotacaoSeloDto.idEstabelecimento());
 
-            try {
-                selo = seloService.getByEventoAndTipoSelo(evento, createVotacaoSeloDto.tipoSelo());
-            } catch (BusinessException e) {
-                selo = null;
+            selo = seloService.create(createSeloDto);
+        } catch (BusinessException e) {
+            if (e.getType() != ExceptionTypesEnum.CONFLICT) {
+                throw e;
             }
-        } else {
-            estabelecimento = estabelecimentoService.getEstabelecimentoById(createVotacaoSeloDto.idEstabelecimento()).orElseThrow(() ->
-                new BusinessException("Estabelecimento não encontrado", ExceptionTypesEnum.NOT_FOUND)
-            );
 
-            try {
-                selo = seloService.getByEstabelecimentoAndTipoSelo(estabelecimento, createVotacaoSeloDto.tipoSelo());
-            } catch (BusinessException e) {
-                selo = null;
+            if (createVotacaoSeloDto.idEvento() != null) {
+                selo = seloService.getByIdEventoAndTipoSelo(createVotacaoSeloDto.idEvento(), createVotacaoSeloDto.tipoSelo());
+            } else {
+                selo = seloService.getByIdEstabelecimentoAndTipoSelo(createVotacaoSeloDto.idEstabelecimento(), createVotacaoSeloDto.tipoSelo());
             }
         }
 
-        if (selo == null) {
-            selo = new Selo();
-
-            selo.setTipoSelo(createVotacaoSeloDto.tipoSelo());
-            selo.setEvento(evento);
-            selo.setEstabelecimento(estabelecimento);
-            selo.setValidado(false);
-
-            seloService.save(selo);
-        } else if (selo.getValidado()) {
+        if (selo.getValidado()) {
             throw new BusinessException("Selo já validado", ExceptionTypesEnum.CONFLICT);
         }
-
-        Usuario usuario = usuarioService.getUsuarioById(createVotacaoSeloDto.idUsuario());
 
         if (votacaoSeloRepository.findByUsuarioAndSelo(usuario, selo).isPresent()) {
             throw new BusinessException("Validação já criada", ExceptionTypesEnum.CONFLICT);
@@ -173,22 +134,13 @@ public class VotacaoSeloService {
         );
     }
 
-    public List<VotacaoSelo> getByUsuario(Integer idUsuario) throws UsuarioNotFoundException, BusinessException {
-        Usuario usuario = usuarioService.getUsuarioById(idUsuario);
-
+    public List<VotacaoSelo> getByUsuario(Usuario usuario) {
         return votacaoSeloRepository.findByUsuario(usuario);
     }
 
-    public List<TipoSeloEnum> getDisponiveisByEstabelecimento(int idUsuario, int idEstabelecimento) throws
-        BusinessException,
-        UsuarioNotFoundException
+    public List<TipoSeloEnum> getDisponiveisByEstabelecimento(Integer idEstabelecimento, Usuario usuario) throws
+        BusinessException
     {
-        final Estabelecimento estabelecimento = estabelecimentoService.getEstabelecimentoById(idEstabelecimento).orElseThrow(() ->
-            new BusinessException("Estabelecimento não encontrado", ExceptionTypesEnum.NOT_FOUND)
-        );
-
-        final Usuario usuario = usuarioService.getUsuarioById(idUsuario);
-
         return Stream.of(TipoSeloEnum.values())
             .parallel()
             .filter(tipoSelo -> {
@@ -199,7 +151,7 @@ public class VotacaoSeloService {
                 Selo selo;
 
                 try {
-                    selo = seloService.getByEstabelecimentoAndTipoSelo(estabelecimento, tipoSelo);
+                    selo = seloService.getByIdEstabelecimentoAndTipoSelo(idEstabelecimento, tipoSelo);
                 } catch (BusinessException e) {
                     selo = null;
                 }
@@ -215,15 +167,9 @@ public class VotacaoSeloService {
             .collect(Collectors.toList());
     }
 
-    public List<TipoSeloEnum> getDisponiveisByEvento(int idUsuario, int idEvento) throws
-        BusinessException,
-        EventoNotFoundException,
-        UsuarioNotFoundException
+    public List<TipoSeloEnum> getDisponiveisByEvento(Integer idEvento, Usuario usuario) throws
+        BusinessException
     {
-        final Evento evento = eventoService.getById(idEvento);
-
-        final Usuario usuario = usuarioService.getUsuarioById(idUsuario);
-
         return Stream.of(TipoSeloEnum.values())
             .parallel()
             .filter(tipoSelo -> {
@@ -234,7 +180,7 @@ public class VotacaoSeloService {
                 Selo selo;
 
                 try {
-                    selo = seloService.getByEventoAndTipoSelo(evento, tipoSelo);
+                    selo = seloService.getByIdEventoAndTipoSelo(idEvento, tipoSelo);
                 } catch (BusinessException e) {
                     selo = null;
                 }
@@ -250,10 +196,39 @@ public class VotacaoSeloService {
             .collect(Collectors.toList());
     }
 
-    public List<GrupoVotacaoSelo> getValidacoesPendentes() {
-        return votacaoSeloRepository.findValidacoesPendentes();
+    public List<EventoGrupoVotacaoSeloDto> getValidacoesPendentesByEvento() {
+        return eventoRepository
+            .findAll()
+            .stream()
+            .parallel()
+            .map(evento -> {
+                List<GrupoVotacaoSeloDto> gruposVotacaoSelo = votacaoSeloRepository.findValidacoesPendentesByEvento(evento.getId());
+
+                return new EventoGrupoVotacaoSeloDto(evento, gruposVotacaoSelo);
+            })
+            .filter(item -> {
+                return item.getGruposVotacaoSelo().size() > 0;
+            })
+            .collect(Collectors.toList());
     }
 
+    public List<EstabelecimentoGrupoVotacaoSeloDto> getValidacoesPendentesByEstabelecimento() {
+        return estabelecimentoRepository
+            .findAll()
+            .stream()
+            .parallel()
+            .map(estabelecimento -> {
+                List<GrupoVotacaoSeloDto> gruposVotacaoSelo = votacaoSeloRepository.findValidacoesPendentesByEstabelecimento(estabelecimento.getId());
+
+                return new EstabelecimentoGrupoVotacaoSeloDto(estabelecimento, gruposVotacaoSelo);
+            })
+            .filter(item -> {
+                return item.getGruposVotacaoSelo().size() > 0;
+            })
+            .collect(Collectors.toList());
+    }
+
+    @Transactional
     public void validateVotacao(final ValidateVotacaoDto validateVotacaoDto) throws BusinessException {
         validate(validateVotacaoDto);
 
@@ -277,13 +252,15 @@ public class VotacaoSeloService {
 
                 int reputacao = votacaoSelo.getUsuario().getReputacao() + (votacaoSelo.getPossuiSelo() == validateVotacaoDto.possuiSelo() ? 5 : -3);
 
-                try {
-                    usuarioService.updateReputacaoById(votacaoSelo.getUsuario().getId(), reputacao);
-                } catch (BusinessException error) {
-                    return;
-                }
+                Usuario usuario = votacaoSelo.getUsuario();
+
+                usuario.setReputacao(reputacao);
+
+                usuarioRepository.save(usuario);
             });
 
-        seloService.validateSeloById(validateVotacaoDto.idSelo());
+        if (validateVotacaoDto.possuiSelo()) {
+            seloService.validateSeloById(validateVotacaoDto.idSelo());
+        }
     }
 }

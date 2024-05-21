@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import java.util.Date;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "evento")
 public class Evento {
@@ -30,14 +32,19 @@ public class Evento {
             inverseJoinColumns = @JoinColumn(name = "categoria_id"))
     private Set<Categoria> categorias;
 
-    @OneToMany
+    @JsonIgnore
+    @OneToMany(mappedBy = "evento")
     private Set<Selo> selos;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "id_estabelecimento")
     private Estabelecimento estabelecimento;
 
-    @OneToMany(mappedBy = "evento")
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "id_criador")
+    private Usuario criador;
+
+    @OneToMany(mappedBy = "evento", fetch = FetchType.EAGER)
     private Set<Feedback> feedbacks;
 
     public Integer getId() {
@@ -142,6 +149,14 @@ public class Evento {
 
     public void setEstabelecimento(Estabelecimento estabelecimento) {
         this.estabelecimento = estabelecimento;
+    }
+
+    public Usuario getCriador() {
+        return criador;
+    }
+
+    public void setCriador(Usuario criador) {
+        this.criador = criador;
     }
 
     public Set<Feedback> getFeedbacks() {

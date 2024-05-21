@@ -7,10 +7,12 @@ import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.exceptions.enums.ExceptionTypesEnum;
 import br.ufrn.imd.incluevents.model.Estabelecimento;
 import br.ufrn.imd.incluevents.model.Selo;
+import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.repository.EstabelecimentoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.List;
 
 @Service
 public class EstabelecimentoService {
@@ -23,7 +25,11 @@ public class EstabelecimentoService {
         this.seloService = seloService;
     }
 
-    public EstabelecimentoDto createEstabelecimento(CreateEstabelecimentoDto estabelecimento) throws BusinessException {
+    public List<Estabelecimento> findAll() {
+        return this.estabelecimentoRepository.findAll();
+    }
+
+    public EstabelecimentoDto createEstabelecimento(CreateEstabelecimentoDto estabelecimento, Usuario usuario) throws BusinessException {
         if (estabelecimento.nome().isEmpty() || estabelecimento.nome().equals(" ")) {
             throw new BusinessException("Nome inválido", ExceptionTypesEnum.BAD_REQUEST);
         }
@@ -32,6 +38,7 @@ public class EstabelecimentoService {
         newEstabelecimento.setNome(estabelecimento.nome());
         newEstabelecimento.setEndereco(estabelecimento.endereco());
         newEstabelecimento.setTelefone(estabelecimento.telefone());
+        newEstabelecimento.setCriador(usuario);
         Estabelecimento created = estabelecimentoRepository.save(newEstabelecimento);
         return new EstabelecimentoDto(created.getId(), created.getNome(),
                 created.getEndereco(), created.getTelefone(), created.getSelos());
@@ -50,15 +57,6 @@ public class EstabelecimentoService {
         Estabelecimento updated = estabelecimentoRepository.save(estabelecimentoToUpdate);
         return new EstabelecimentoDto(updated.getId(), updated.getNome(),
                 updated.getEndereco(), updated.getTelefone(), updated.getSelos());
-
-    }
-
-    public Optional<Estabelecimento> getEstabelecimentoById(int id) throws BusinessException {
-        if (id < 0) {
-            throw new BusinessException("Id inválido", ExceptionTypesEnum.BAD_REQUEST);
-        }
-
-        return estabelecimentoRepository.findById(id);
 
     }
 

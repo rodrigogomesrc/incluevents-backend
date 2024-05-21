@@ -4,6 +4,7 @@ import br.ufrn.imd.incluevents.dto.CreateEstabelecimentoDto;
 import br.ufrn.imd.incluevents.dto.EstabelecimentoDto;
 import br.ufrn.imd.incluevents.dto.UpdateEstabelecimentoDto;
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
+import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.service.EstabelecimentoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,9 @@ public class EstabelecimentoController {
     @PostMapping
     public ResponseEntity<?> createEstabelecimento(@RequestBody CreateEstabelecimentoDto estabelecimento) {
         try {
-            EstabelecimentoDto createdEstabelecimento = estabelecimentoService.createEstabelecimento(estabelecimento);
+            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
+
+            EstabelecimentoDto createdEstabelecimento = estabelecimentoService.createEstabelecimento(estabelecimento, usuario);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdEstabelecimento);
         } catch (BusinessException e) {
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());

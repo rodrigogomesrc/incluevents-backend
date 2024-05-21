@@ -2,6 +2,7 @@ package br.ufrn.imd.incluevents.controller;
 
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.model.Evento;
+import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.service.EventoService;
 
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,10 @@ public class EventoController {
     @PostMapping
     public ResponseEntity<?> createEvento(@RequestBody Evento evento) {
         try {
+            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
+
+            evento.setCriador(usuario);
+
             Evento createdEvento = service.save(evento);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdEvento);
         } catch (BusinessException e) {

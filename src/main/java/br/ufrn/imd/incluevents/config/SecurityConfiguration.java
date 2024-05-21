@@ -31,9 +31,10 @@ public class SecurityConfiguration {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(autorize -> autorize
                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                .requestMatchers(HttpMethod.POST, "/usuario").permitAll()
-                .requestMatchers(HttpMethod.GET, "/usuario").permitAll()
+                .requestMatchers(HttpMethod.POST, "/usuarios").permitAll()
+                .requestMatchers(HttpMethod.GET, "/usuarios").permitAll()
                 .requestMatchers(HttpMethod.GET, "/upload/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/categorias").permitAll()
                .anyRequest().authenticated()
             )
             .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

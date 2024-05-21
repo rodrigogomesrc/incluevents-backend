@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,37 +57,6 @@ public class VotacaoSeloController {
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getById(@PathVariable("id") int id) {
-        try {
-            VotacaoSelo votacaoSelo = votacaoSeloService.getById(id);
-
-            return ResponseEntity.status(HttpStatus.OK).body(votacaoSelo);
-        } catch (BusinessException e) {
-            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
-        } catch (Exception e) {
-            logger.error("Erro ao recuperar votação", e);
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao recuperar votação");
-        }
-    }
-
-    @GetMapping
-    public ResponseEntity<?> getByUsuario() {
-
-        try {
-            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
-
-            List<VotacaoSelo> validacoes = votacaoSeloService.getByUsuario(usuario);
-
-            return ResponseEntity.status(HttpStatus.OK).body(validacoes);
-        } catch (Exception e) {
-            logger.error("Erro ao recuperar votações de selo", e);
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao recuperar votações de selo");
-        }
-    }
-
     @GetMapping("/disponiveis")
     public ResponseEntity<?> getTiposSeloDisponiveis(
         @RequestParam(required = false) Integer idEstabelecimento,
@@ -129,14 +97,18 @@ public class VotacaoSeloController {
     @GetMapping("/pendentes")
     public ResponseEntity<?> getValidacoesPendentes() {
         try {
-            List<EventoGrupoVotacaoSeloDto> pendentesByEvento = votacaoSeloService.getValidacoesPendentesByEvento();
-            List<EstabelecimentoGrupoVotacaoSeloDto> pendentesByEstabelecimento = votacaoSeloService.getValidacoesPendentesByEstabelecimento();
+            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
+
+            List<EventoGrupoVotacaoSeloDto> pendentesByEvento = votacaoSeloService.getValidacoesPendentesByEvento(usuario);
+            List<EstabelecimentoGrupoVotacaoSeloDto> pendentesByEstabelecimento = votacaoSeloService.getValidacoesPendentesByEstabelecimento(usuario);
             List<Object> pendentes = new ArrayList<>();
 
             pendentes.addAll(pendentesByEvento);
             pendentes.addAll(pendentesByEstabelecimento);
 
             return ResponseEntity.status(HttpStatus.OK).body(pendentes);
+        } catch (BusinessException e) {
+            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Erro ao recuperar selos com votações pendentes a serem validadas");
 
@@ -147,7 +119,9 @@ public class VotacaoSeloController {
     @PostMapping("/validar")
     public ResponseEntity<?> validate(@RequestBody ValidateVotacaoDto validateVotacaoDto) {
         try {
-            votacaoSeloService.validateVotacao(validateVotacaoDto);
+            Usuario usuario = GetUsuarioLogado.getUsuarioLogado();
+
+            votacaoSeloService.validateVotacao(validateVotacaoDto, usuario);
 
             return ResponseEntity.status(HttpStatus.OK).body(null);
         } catch (BusinessException e) {

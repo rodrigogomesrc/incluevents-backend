@@ -12,6 +12,8 @@ public class GetHttpCode {
                 return org.springframework.http.HttpStatus.BAD_REQUEST.value();
             case CONFLICT:
                 return org.springframework.http.HttpStatus.CONFLICT.value();
+            case FORBIDDEN:
+                return org.springframework.http.HttpStatus.FORBIDDEN.value();
             default:
                 return org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR.value();
         }

@@ -8,10 +8,10 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 
 import br.ufrn.imd.incluevents.dto.CreateDocumentacaoSeloDto;
-import br.ufrn.imd.incluevents.dto.CreateSeloDto;
 import br.ufrn.imd.incluevents.dto.EstabelecimentoDocumentacaoSeloDto;
 import br.ufrn.imd.incluevents.dto.EventoDocumentacoesSeloDto;
-import br.ufrn.imd.incluevents.dto.ValidateDcoumentacaoDto;
+import br.ufrn.imd.incluevents.dto.ValidateDocumentacaoDto;
+import br.ufrn.imd.incluevents.dto.ValidateVotacaoDto;
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.exceptions.enums.ExceptionTypesEnum;
 import br.ufrn.imd.incluevents.model.DocumentacaoSelo;
@@ -20,10 +20,8 @@ import br.ufrn.imd.incluevents.model.Evento;
 import br.ufrn.imd.incluevents.model.Selo;
 import br.ufrn.imd.incluevents.model.Usuario;
 import br.ufrn.imd.incluevents.model.enums.TipoSeloEnum;
+import br.ufrn.imd.incluevents.model.enums.TipoUsuarioEnum;
 import br.ufrn.imd.incluevents.repository.DocumentacaoSeloRepository;
-import br.ufrn.imd.incluevents.repository.EstabelecimentoRepository;
-import br.ufrn.imd.incluevents.repository.EventoRepository;
-import br.ufrn.imd.incluevents.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -32,37 +30,49 @@ public class DocumentacaoSeloService {
 
     private final SeloService seloService;
     private final StorageService storageService;
-
-    private final EventoRepository eventoRepository;
-    private final EstabelecimentoRepository estabelecimentoRepository;
-    private final UsuarioRepository usuarioRepository;
+    private final EventoService eventoService;
+    private final EstabelecimentoService estabelecimentoService;
+    private final UsuarioService usuarioService;
+    private final VotacaoSeloService votacaoSeloService;
 
     public DocumentacaoSeloService(
         DocumentacaoSeloRepository documentacaoSeloRepository,
         SeloService seloService,
         StorageService storageService,
-        EventoRepository eventoRepository,
-        EstabelecimentoRepository estabelecimentoRepository,
-        UsuarioRepository usuarioRepository
+        EventoService eventoService,
+        EstabelecimentoService estabelecimentoService,
+        UsuarioService usuarioService,
+        VotacaoSeloService votacaoSeloService
     ) {
         this.documentacaoSeloRepository = documentacaoSeloRepository;
 
         this.seloService = seloService;
         this.storageService = storageService;
-        this.eventoRepository = eventoRepository;
-        this.estabelecimentoRepository = estabelecimentoRepository;
-        this.usuarioRepository = usuarioRepository;
+        this.eventoService = eventoService;
+        this.estabelecimentoService = estabelecimentoService;
+        this.usuarioService = usuarioService;
+        this.votacaoSeloService = votacaoSeloService;
     }
 
-    private void validate(CreateDocumentacaoSeloDto createDocumentacaoSeloDto) throws BusinessException {
+    private void validateDto(CreateDocumentacaoSeloDto createDocumentacaoSeloDto) throws BusinessException {
         List<String> errors = new ArrayList<>();
 
-        try {
-            CreateSeloDto createSeloDto = new CreateSeloDto(createDocumentacaoSeloDto.tipoSelo(), createDocumentacaoSeloDto.idEvento(), createDocumentacaoSeloDto.idEstabelecimento());
+        if (createDocumentacaoSeloDto.idEvento() == null && createDocumentacaoSeloDto.idEstabelecimento() == null) {
+            errors.add("Deve ter o campo idEvento ou idEstabelecimento");
+        } else if (createDocumentacaoSeloDto.idEvento() != null && createDocumentacaoSeloDto.idEstabelecimento() != null) {
+            errors.add("Deve ter apenas um dos campos idEvento ou idEstabelecimento");
+        } else if (createDocumentacaoSeloDto.idEstabelecimento() != null && createDocumentacaoSeloDto.idEstabelecimento() < 0) {
+            errors.add("Id do estabelecimento inválido");
+        } else if (createDocumentacaoSeloDto.idEvento() != null && createDocumentacaoSeloDto.idEvento() < 0) {
+            errors.add("Id do evento inválido");
+        }
 
-            seloService.validate(createSeloDto);
-        } catch (BusinessException e) {
-            errors.add(e.getMessage());
+        if (createDocumentacaoSeloDto.tipoSelo() == null) {
+            errors.add("Deve ter campo tipoSelo");
+        } else if (createDocumentacaoSeloDto.idEvento() != null && !createDocumentacaoSeloDto.tipoSelo().getTipoEntidade().equals("EVENTO")) {
+            errors.add("Tipo de selo inválido");
+        } else if (createDocumentacaoSeloDto.idEstabelecimento() != null && !createDocumentacaoSeloDto.tipoSelo().getTipoEntidade().equals("ESTABELECIMENTO")) {
+            errors.add("Tipo de selo inválido");
         }
 
         if (createDocumentacaoSeloDto.arquivo() == null) {
@@ -74,14 +84,14 @@ public class DocumentacaoSeloService {
         }
     }
 
-    private void validate(ValidateDcoumentacaoDto validateDcoumentacaoDto) throws BusinessException {
+    private void validateDto(ValidateDocumentacaoDto validateDocumentacaoDto) throws BusinessException {
         List<String> errors = new ArrayList<>();
 
-        if (validateDcoumentacaoDto.idDocumentacao() == null) {
+        if (validateDocumentacaoDto.idDocumentacao() == null) {
             errors.add("Deve ter o campo idDocumentacao");
         }
 
-        if (validateDcoumentacaoDto.valida() == null) {
+        if (validateDocumentacaoDto.valida() == null) {
             errors.add("Deve ter o campo valida");
         }
 
@@ -93,45 +103,35 @@ public class DocumentacaoSeloService {
     @Transactional
     public DocumentacaoSelo create(CreateDocumentacaoSeloDto createDocumentacaoSeloDto, Usuario usuario, String baseUrl) throws BusinessException {
         Selo selo;
+        Evento evento = null;
+        Estabelecimento estabelecimento = null;
 
-        validate(createDocumentacaoSeloDto);
+        validateDto(createDocumentacaoSeloDto);
 
         if (createDocumentacaoSeloDto.idEvento() != null) {
-            Evento evento = eventoRepository.findById(createDocumentacaoSeloDto.idEvento()).orElseThrow(() ->
-                new BusinessException("Evento não encontrado", ExceptionTypesEnum.NOT_FOUND)
-            );
+            evento = eventoService.getById(createDocumentacaoSeloDto.idEvento());
 
-            if (evento.getCriador() != null && evento.getCriador().getId() != usuario.getId()) {
-                throw new BusinessException("Apenas o criador do evento pode enviar a solicitação de documentação", null);
-            } else if (evento.getCriador() == null && usuario.getReputacao() < 70) {
-                throw new BusinessException("Reputação insuficiente para envio de documentação", null);
+            Usuario criador = evento.getCriador();
+
+            if (criador != null && criador.getId() != usuario.getId()) {
+                throw new BusinessException("Apenas o criador do evento pode enviar a solicitação de documentação", ExceptionTypesEnum.FORBIDDEN);
+            } else if (criador == null && usuario.getReputacao() < 70) {
+                throw new BusinessException("Reputação insuficiente para envio de documentação", ExceptionTypesEnum.FORBIDDEN);
             }
+
+            selo = seloService.createToEventoIfNotExists(evento, createDocumentacaoSeloDto.tipoSelo());
         } else {
-            Estabelecimento estabelecimento = estabelecimentoRepository.findById(createDocumentacaoSeloDto.idEstabelecimento()).orElseThrow(() ->
-                new BusinessException("Estabelecimento não encontrado", ExceptionTypesEnum.NOT_FOUND)
-            );
+            estabelecimento = estabelecimentoService.getEstabelecimentoById(createDocumentacaoSeloDto.idEstabelecimento());
 
-            if (estabelecimento.getCriador() != null && estabelecimento.getCriador().getId() != usuario.getId()) {
-                throw new BusinessException("Apenas o criador do evento pode enviar a solicitação de documentação", null);
-            } else if (estabelecimento.getCriador() == null && usuario.getReputacao() < 70) {
-                throw new BusinessException("Reputação insuficiente para envio de documentação", null);
-            }
-        }
+            Usuario criador = estabelecimento.getCriador();
 
-        try {
-            CreateSeloDto createSeloDto = new CreateSeloDto(createDocumentacaoSeloDto.tipoSelo(), createDocumentacaoSeloDto.idEvento(), createDocumentacaoSeloDto.idEstabelecimento());
-
-            selo = seloService.create(createSeloDto);
-        } catch (BusinessException e) {
-            if (e.getType() != ExceptionTypesEnum.CONFLICT) {
-                throw e;
+            if (criador != null && criador.getId() != usuario.getId()) {
+                throw new BusinessException("Apenas o criador do evento pode enviar a solicitação de documentação", ExceptionTypesEnum.FORBIDDEN);
+            } else if (criador == null && usuario.getReputacao() < 70) {
+                throw new BusinessException("Reputação insuficiente para envio de documentação", ExceptionTypesEnum.FORBIDDEN);
             }
 
-            if (createDocumentacaoSeloDto.idEvento() != null) {
-                selo = seloService.getByIdEventoAndTipoSelo(createDocumentacaoSeloDto.idEvento(), createDocumentacaoSeloDto.tipoSelo());
-            } else {
-                selo = seloService.getByIdEstabelecimentoAndTipoSelo(createDocumentacaoSeloDto.idEstabelecimento(), createDocumentacaoSeloDto.tipoSelo());
-            }
+            selo = seloService.createToEstabelecimentoIfNotExists(estabelecimento, createDocumentacaoSeloDto.tipoSelo());
         }
 
         if (selo.getValidado()) {
@@ -212,8 +212,12 @@ public class DocumentacaoSeloService {
             .collect(Collectors.toList());
     }
 
-    public List<EventoDocumentacoesSeloDto> getPendentesByEvento() {
-        return eventoRepository
+    public List<EventoDocumentacoesSeloDto> getValidacoesPendentesByEvento(Usuario usuario) throws BusinessException {
+        if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
+            throw new BusinessException("Você não tem acesso a esse recurso", ExceptionTypesEnum.FORBIDDEN);
+        }
+
+        return eventoService
             .findAll()
             .stream()
             .parallel()
@@ -228,8 +232,12 @@ public class DocumentacaoSeloService {
             .collect(Collectors.toList());
     }
 
-    public List<EstabelecimentoDocumentacaoSeloDto> getPendentesByEstabelecimento() {
-        return estabelecimentoRepository
+    public List<EstabelecimentoDocumentacaoSeloDto> getValidacoesPendentesByEstabelecimento(Usuario usuario) throws BusinessException {
+        if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
+            throw new BusinessException("Você não tem acesso a esse recurso", ExceptionTypesEnum.FORBIDDEN);
+        }
+
+        return estabelecimentoService
             .findAll()
             .stream()
             .parallel()
@@ -245,10 +253,14 @@ public class DocumentacaoSeloService {
     }
 
     @Transactional
-    public void validateDocumentacao(ValidateDcoumentacaoDto validateDcoumentacaoDto) throws BusinessException {
-        validate(validateDcoumentacaoDto);
+    public void validateDocumentacao(ValidateDocumentacaoDto validateDocumentacaoDto, Usuario usuario) throws BusinessException {
+        if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
+            throw new BusinessException("Você não tem acesso a esse recurso", ExceptionTypesEnum.FORBIDDEN);
+        }
 
-        DocumentacaoSelo documentacaoSelo = documentacaoSeloRepository.findById(validateDcoumentacaoDto.idDocumentacao()).orElseThrow(() ->
+        validateDto(validateDocumentacaoDto);
+
+        DocumentacaoSelo documentacaoSelo = documentacaoSeloRepository.findById(validateDocumentacaoDto.idDocumentacao()).orElseThrow(() ->
             new BusinessException("Documentação não encontrada", ExceptionTypesEnum.NOT_FOUND)
         );
 
@@ -256,14 +268,37 @@ public class DocumentacaoSeloService {
             throw new BusinessException("Documentação já validada", ExceptionTypesEnum.CONFLICT);
         }
 
-        documentacaoSelo.setValida(validateDcoumentacaoDto.valida());
+        documentacaoSelo.setValida(validateDocumentacaoDto.valida());
 
         documentacaoSeloRepository.save(documentacaoSelo);
 
-        Usuario usuario = documentacaoSelo.getUsuario();
+        Selo selo = documentacaoSelo.getSelo();
 
-        usuario.setReputacao(validateDcoumentacaoDto.valida() ? usuario.getReputacao() + 10 : usuario.getReputacao() - 10);
+        if (validateDocumentacaoDto.valida()) {
+            ValidateVotacaoDto validateVotacaoDto = new ValidateVotacaoDto(selo.getId(), true);
 
-        usuarioRepository.save(usuario);
+            votacaoSeloService.validateVotacao(validateVotacaoDto, usuario);
+        }
+
+        Evento evento = selo.getEvento();
+        Estabelecimento estabelecimento = selo.getEstabelecimento();
+
+        Usuario criador;
+
+        if (evento != null) {
+            criador = evento.getCriador();
+        } else {
+            criador = estabelecimento.getCriador();
+        }
+
+        if (criador != null) {
+            return;
+        }
+
+        Usuario usuarioDocumentacao = documentacaoSelo.getUsuario();
+
+        int reputacao = usuarioDocumentacao.getReputacao() + (validateDocumentacaoDto.valida() ? 10 : -10);
+
+        usuarioService.updateReputacao(usuarioDocumentacao, reputacao);
     }
 }

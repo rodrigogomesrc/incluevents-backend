@@ -1,92 +1,91 @@
 package br.ufrn.imd.incluevents.service;
-import br.ufrn.imd.incluevents.dto.CreateSeloDto;
+
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.exceptions.enums.ExceptionTypesEnum;
 import br.ufrn.imd.incluevents.model.Estabelecimento;
 import br.ufrn.imd.incluevents.model.Evento;
 import br.ufrn.imd.incluevents.model.Selo;
 import br.ufrn.imd.incluevents.model.enums.TipoSeloEnum;
-import br.ufrn.imd.incluevents.repository.EstabelecimentoRepository;
-import br.ufrn.imd.incluevents.repository.EventoRepository;
 import br.ufrn.imd.incluevents.repository.SeloRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 @Service
 public class SeloService {
     private final SeloRepository seloRepository;
-    private final EventoRepository eventoRepository;
-    private final EstabelecimentoRepository estabelecimentoRepository;
 
-    public SeloService(SeloRepository seloRepository, EventoRepository eventoRepository, EstabelecimentoRepository estabelecimentoRepository) {
+    private final EventoService eventoService;
+    private final EstabelecimentoService estabelecimentoService;
+
+    public SeloService(SeloRepository seloRepository, EventoService eventoService, EstabelecimentoService estabelecimentoService) {
         this.seloRepository = seloRepository;
-        this.eventoRepository = eventoRepository;
-        this.estabelecimentoRepository = estabelecimentoRepository;
+        this.eventoService = eventoService;
+        this.estabelecimentoService = estabelecimentoService;
     }
 
-    public void validate(CreateSeloDto createSeloDto) throws BusinessException {
-        List<String> errors = new ArrayList<>();
-
-        if (createSeloDto.idEvento() == null && createSeloDto.idEstabelecimento() == null) {
-            errors.add("Deve ter o campo idEvento ou idEstabelecimento");
-        } else if (createSeloDto.idEvento() != null && createSeloDto.idEstabelecimento() != null) {
-            errors.add("Deve ter apenas um dos campos idEvento ou idEstabelecimento");
-        } else if (createSeloDto.idEstabelecimento() != null && createSeloDto.idEstabelecimento() < 0) {
-            errors.add("Id do estabelecimento inválido");
-        } else if (createSeloDto.idEvento() != null && createSeloDto.idEvento() < 0) {
-            errors.add("Id do evento inválido");
+    public Selo createToEventoIfNotExists(Evento evento, TipoSeloEnum tipoSelo) throws BusinessException {
+        if (evento == null) {
+            throw new BusinessException("Evento não pode ser nulo", ExceptionTypesEnum.BAD_REQUEST);
         }
 
-        if (createSeloDto.tipoSelo() == null) {
-            errors.add("Deve ter campo tipoSelo");
-        } else if (createSeloDto.idEvento() != null && createSeloDto.tipoSelo().getTipoEntidade() != "EVENTO") {
-            errors.add("Tipo de selo inválido");
-        } else if (createSeloDto.idEstabelecimento() != null && createSeloDto.tipoSelo().getTipoEntidade() != "ESTABELECIMENTO") {
-            errors.add("Tipo de selo inválido");
+        if (!tipoSelo.getTipoEntidade().equals("EVENTO")) {
+            throw new BusinessException("TIpo do selo inválido", ExceptionTypesEnum.BAD_REQUEST);
         }
-
-        if (errors.size() > 0) {
-            throw new BusinessException(String.join("\n", errors), ExceptionTypesEnum.BAD_REQUEST);
-        }
-    }
-
-    public Selo create(CreateSeloDto createSeloDto) throws BusinessException {
-        validate(createSeloDto);
 
         Optional<Selo> seloOptional;
-        Evento evento = null;
-        Estabelecimento estabelecimento = null;
 
-        if (createSeloDto.idEvento() != null) {
-            evento = eventoRepository.findById(createSeloDto.idEvento()).orElseThrow(() ->
-                new BusinessException("Evento não encontrado", ExceptionTypesEnum.NOT_FOUND)
-            );
-
-            seloOptional = seloRepository.findByEventoAndTipoSelo(evento, createSeloDto.tipoSelo());
-        } else {
-            estabelecimento = estabelecimentoRepository.findById(createSeloDto.idEstabelecimento()).orElseThrow(() ->
-                new BusinessException("Estabelecimento não encontrado", ExceptionTypesEnum.NOT_FOUND)
-            );
-
-            seloOptional = seloRepository.findByEstabelecimentoAndTipoSelo(estabelecimento, createSeloDto.tipoSelo());
-        }
+        seloOptional = seloRepository.findByEventoAndTipoSelo(evento, tipoSelo);
 
         if (seloOptional.isPresent()) {
-            throw new BusinessException("Selo já existe", ExceptionTypesEnum.CONFLICT);
+            return seloOptional.get();
         }
 
         Selo selo = new Selo();
 
         selo.setEvento(evento);
-        selo.setEstabelecimento(estabelecimento);
-        selo.setTipoSelo(createSeloDto.tipoSelo());
+        selo.setTipoSelo(tipoSelo);
         selo.setValidado(false);
 
         seloRepository.save(selo);
 
         return selo;
+    }
+
+    public Selo createToEventoIfNotExists(Integer idEvento, TipoSeloEnum tipoSelo) throws BusinessException {
+        return createToEventoIfNotExists(eventoService.getById(idEvento), tipoSelo);
+    }
+
+    public Selo createToEstabelecimentoIfNotExists(Estabelecimento estabelecimento, TipoSeloEnum tipoSelo) throws BusinessException {
+        if (estabelecimento == null) {
+            throw new BusinessException("Estabelecimento não pode ser nulo", ExceptionTypesEnum.BAD_REQUEST);
+        }
+
+        if (!tipoSelo.getTipoEntidade().equals("ESTABELECIMENTO")) {
+            throw new BusinessException("TIpo do selo inválido", ExceptionTypesEnum.BAD_REQUEST);
+        }
+
+        Optional<Selo> seloOptional;
+
+        seloOptional = seloRepository.findByEstabelecimentoAndTipoSelo(estabelecimento, tipoSelo);
+
+        if (seloOptional.isPresent()) {
+            return seloOptional.get();
+        }
+
+        Selo selo = new Selo();
+
+        selo.setEstabelecimento(estabelecimento);
+        selo.setTipoSelo(tipoSelo);
+        selo.setValidado(false);
+
+        seloRepository.save(selo);
+
+        return selo;
+    }
+
+    public Selo createToEstabelecimentoIfNotExists(Integer idEstabelecimento, TipoSeloEnum tipoSelo) throws BusinessException {
+        return createToEstabelecimentoIfNotExists(estabelecimentoService.getEstabelecimentoById(idEstabelecimento), tipoSelo);
     }
 
     public Selo save(Selo selo) throws BusinessException {
@@ -132,9 +131,7 @@ public class SeloService {
     }
 
     public Selo getByIdEventoAndTipoSelo(Integer idEvento, TipoSeloEnum tipoSelo) throws BusinessException {
-        Evento evento = eventoRepository.findById(idEvento).orElseThrow(() ->
-            new BusinessException("Evento não encontrado", ExceptionTypesEnum.NOT_FOUND)
-        );
+        Evento evento = eventoService.getById(idEvento);
 
         return seloRepository.findByEventoAndTipoSelo(evento, tipoSelo).orElseThrow(() ->
             new BusinessException("Selo não encontrado", ExceptionTypesEnum.NOT_FOUND)
@@ -142,24 +139,14 @@ public class SeloService {
     }
 
     public Selo getByIdEstabelecimentoAndTipoSelo(Integer idEstabelecimento, TipoSeloEnum tipoSelo) throws BusinessException {
-        Estabelecimento estabelecimento = estabelecimentoRepository.findById(idEstabelecimento).orElseThrow(() ->
-            new BusinessException("Estabelecimento não encontrado", ExceptionTypesEnum.NOT_FOUND)
-        );
+        Estabelecimento estabelecimento = estabelecimentoService.getEstabelecimentoById(idEstabelecimento);
 
         return seloRepository.findByEstabelecimentoAndTipoSelo(estabelecimento, tipoSelo).orElseThrow(() ->
             new BusinessException("Selo não encontrado", ExceptionTypesEnum.NOT_FOUND)
         );
     }
 
-    public void validateSeloById(Integer idSelo) throws BusinessException {
-        if (idSelo == null || idSelo < 0) {
-            throw new BusinessException("Id do selo inválido", ExceptionTypesEnum.BAD_REQUEST);
-        }
-
-        Selo selo = seloRepository.findById(idSelo).orElseThrow(() ->
-            new BusinessException("Selo não encontrado", ExceptionTypesEnum.NOT_FOUND)
-        );
-
+    public void validateSelo(Selo selo) throws BusinessException {
         selo.setValidado(true);
 
         seloRepository.save(selo);

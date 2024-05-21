@@ -32,6 +32,7 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(autorize -> autorize
                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/usuarios").permitAll()
+                .requestMatchers(HttpMethod.GET, "/eventos/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/usuarios").permitAll()
                 .requestMatchers(HttpMethod.GET, "/upload/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/categorias").permitAll()

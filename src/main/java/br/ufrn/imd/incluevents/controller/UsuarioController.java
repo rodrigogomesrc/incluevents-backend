@@ -1,5 +1,6 @@
 package br.ufrn.imd.incluevents.controller;
 
+import br.ufrn.imd.incluevents.controller.component.GetUsuarioLogadoHelper;
 import br.ufrn.imd.incluevents.dto.CreateUsuarioDto;
 import br.ufrn.imd.incluevents.dto.UpdateUsuarioDto;
 import br.ufrn.imd.incluevents.exceptions.BusinessException;
@@ -20,10 +21,12 @@ import org.slf4j.LoggerFactory;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final GetUsuarioLogadoHelper getUsuarioLogadoHelper;
     private static final Logger logger = LoggerFactory.getLogger(UsuarioController.class);
 
-    public UsuarioController(UsuarioService usuarioService){
+    public UsuarioController(UsuarioService usuarioService, GetUsuarioLogadoHelper getUsuarioLogadoHelper){
         this.usuarioService = usuarioService;
+        this.getUsuarioLogadoHelper = getUsuarioLogadoHelper;
     }
 
     @PostMapping()
@@ -36,6 +39,20 @@ public class UsuarioController {
         }catch (Exception e){
             logger.error("Erro ao salvar Usuário", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar Usuário");
+        }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getUsuarioLogado(){
+        try{
+            Usuario usuario = getUsuarioLogadoHelper.getUsuarioLogado();
+
+            return ResponseEntity.status(HttpStatus.OK).body(usuario);
+        }catch(BusinessException e){
+            return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
+        }catch (Exception e){
+            logger.error("Erro ao buscar Usuário", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao buscar Usuário");
         }
     }
 

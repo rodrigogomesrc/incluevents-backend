@@ -148,7 +148,7 @@ public class DocumentacaoSeloService {
 
         documentacaoSelo.setSelo(selo);
         documentacaoSelo.setUsuario(usuario);
-        documentacaoSelo.setUrlArquivo(baseUrl + "/" + nomeArquivo);
+        documentacaoSelo.setUrlArquivo(baseUrl + "/upload/" + nomeArquivo);
         documentacaoSelo.setNomeArquivo(createDocumentacaoSeloDto.arquivo().getOriginalFilename());
 
         return documentacaoSeloRepository.save(documentacaoSelo);

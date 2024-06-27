@@ -20,7 +20,6 @@ import br.ufrn.imd.incluevents.framework.model.Evento;
 import br.ufrn.imd.incluevents.framework.model.Selo;
 import br.ufrn.imd.incluevents.framework.model.Usuario;
 import br.ufrn.imd.incluevents.framework.model.enums.TipoSeloEnum;
-import br.ufrn.imd.incluevents.framework.model.enums.TipoUsuarioEnum;
 import br.ufrn.imd.incluevents.framework.repository.DocumentacaoSeloRepository;
 import jakarta.transaction.Transactional;
 
@@ -32,7 +31,6 @@ public class DocumentacaoSeloService {
     private final StorageService storageService;
     private final EventoService eventoService;
     private final EstabelecimentoService estabelecimentoService;
-    private final UsuarioService usuarioService;
     private final VotacaoSeloService votacaoSeloService;
 
     public DocumentacaoSeloService(
@@ -41,7 +39,6 @@ public class DocumentacaoSeloService {
         StorageService storageService,
         EventoService eventoService,
         EstabelecimentoService estabelecimentoService,
-        UsuarioService usuarioService,
         VotacaoSeloService votacaoSeloService
     ) {
         this.documentacaoSeloRepository = documentacaoSeloRepository;
@@ -50,7 +47,6 @@ public class DocumentacaoSeloService {
         this.storageService = storageService;
         this.eventoService = eventoService;
         this.estabelecimentoService = estabelecimentoService;
-        this.usuarioService = usuarioService;
         this.votacaoSeloService = votacaoSeloService;
     }
 
@@ -115,7 +111,7 @@ public class DocumentacaoSeloService {
 
             if (criador != null && criador.getId() != usuario.getId()) {
                 throw new BusinessException("Apenas o criador do evento pode enviar a solicitação de documentação", ExceptionTypesEnum.FORBIDDEN);
-            } else if (criador == null && usuario.getReputacao() < 70) {
+            } else if (criador == null /*&& usuario.getReputacao() < 70 */) {
                 throw new BusinessException("Reputação insuficiente para envio de documentação", ExceptionTypesEnum.FORBIDDEN);
             }
 
@@ -127,7 +123,7 @@ public class DocumentacaoSeloService {
 
             if (criador != null && criador.getId() != usuario.getId()) {
                 throw new BusinessException("Apenas o criador do evento pode enviar a solicitação de documentação", ExceptionTypesEnum.FORBIDDEN);
-            } else if (criador == null && usuario.getReputacao() < 70) {
+            } else if (criador == null /* && usuario.getReputacao() < 70  */) {
                 throw new BusinessException("Reputação insuficiente para envio de documentação", ExceptionTypesEnum.FORBIDDEN);
             }
 
@@ -213,9 +209,9 @@ public class DocumentacaoSeloService {
     }
 
     public List<EventoDocumentacoesSeloDto> getValidacoesPendentesByEvento(Usuario usuario) throws BusinessException {
-        if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
+        /*if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
             throw new BusinessException("Você não tem acesso a esse recurso", ExceptionTypesEnum.FORBIDDEN);
-        }
+        }*/
 
         return eventoService
             .findAll()
@@ -233,9 +229,9 @@ public class DocumentacaoSeloService {
     }
 
     public List<EstabelecimentoDocumentacaoSeloDto> getValidacoesPendentesByEstabelecimento(Usuario usuario) throws BusinessException {
-        if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
+        /*if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
             throw new BusinessException("Você não tem acesso a esse recurso", ExceptionTypesEnum.FORBIDDEN);
-        }
+        }*/
 
         return estabelecimentoService
             .findAll()
@@ -254,9 +250,9 @@ public class DocumentacaoSeloService {
 
     @Transactional
     public void validateDocumentacao(ValidateDocumentacaoDto validateDocumentacaoDto, Usuario usuario) throws BusinessException {
-        if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
+        /*if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
             throw new BusinessException("Você não tem acesso a esse recurso", ExceptionTypesEnum.FORBIDDEN);
-        }
+        }*/
 
         validateDto(validateDocumentacaoDto);
 

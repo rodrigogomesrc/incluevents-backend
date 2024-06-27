@@ -18,7 +18,6 @@ import br.ufrn.imd.incluevents.framework.model.Selo;
 import br.ufrn.imd.incluevents.framework.model.Usuario;
 import br.ufrn.imd.incluevents.framework.model.VotacaoSelo;
 import br.ufrn.imd.incluevents.framework.model.enums.TipoSeloEnum;
-import br.ufrn.imd.incluevents.framework.model.enums.TipoUsuarioEnum;
 import br.ufrn.imd.incluevents.framework.repository.VotacaoSeloRepository;
 import jakarta.transaction.Transactional;
 
@@ -27,7 +26,6 @@ public class VotacaoSeloService {
     private final VotacaoSeloRepository votacaoSeloRepository;
 
     private final SeloService seloService;
-    private final UsuarioService usuarioService;
     private final EventoService eventoService;
     private final EstabelecimentoService estabelecimentoService;
 
@@ -40,7 +38,6 @@ public class VotacaoSeloService {
     ) {
         this.votacaoSeloRepository = votacaoSeloRepository;
         this.seloService = seloService;
-        this.usuarioService = usuarioService;
         this.eventoService = eventoService;
         this.estabelecimentoService = estabelecimentoService;
     }
@@ -121,7 +118,7 @@ public class VotacaoSeloService {
 
         votacaoSelo.setDescricao(createVotacaoSeloDto.descricao());
         votacaoSelo.setPossuiSelo(createVotacaoSeloDto.possuiSelo());
-        votacaoSelo.setScore(usuario.getReputacao());
+        //votacaoSelo.setScore(usuario.getReputacao());
         votacaoSelo.setSelo(selo);
         votacaoSelo.setUsuario(usuario);
 
@@ -187,9 +184,9 @@ public class VotacaoSeloService {
     }
 
     public List<EventoGrupoVotacaoSeloDto> getValidacoesPendentesByEvento(Usuario usuario) throws BusinessException {
-        if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
+        /*if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
             throw new BusinessException("Você não tem acesso a esse recurso", ExceptionTypesEnum.FORBIDDEN);
-        }
+        }*/
 
         return eventoService
             .findAll()
@@ -207,9 +204,9 @@ public class VotacaoSeloService {
     }
 
     public List<EstabelecimentoGrupoVotacaoSeloDto> getValidacoesPendentesByEstabelecimento(Usuario usuario) throws BusinessException {
-        if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
+        /*if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
             throw new BusinessException("Você não tem acesso a esse recurso", ExceptionTypesEnum.FORBIDDEN);
-        }
+        }*/
 
         return estabelecimentoService
             .findAll()
@@ -228,9 +225,9 @@ public class VotacaoSeloService {
 
     @Transactional
     public void validateVotacao(final ValidateVotacaoDto validateVotacaoDto, Usuario usuario) throws BusinessException {
-        if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
+        /*if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
             throw new BusinessException("Você não tem acesso a esse recurso", ExceptionTypesEnum.FORBIDDEN);
-        }
+        }*/
 
         validateDto(validateVotacaoDto);
 

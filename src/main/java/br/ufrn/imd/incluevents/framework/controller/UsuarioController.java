@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 @RestController
 @RequestMapping("/usuarios")
 @CrossOrigin(origins = "http://localhost:3000")
-public class UsuarioController {
+public abstract class UsuarioController {
 
     private final UsuarioService usuarioService;
     private final GetUsuarioLogadoHelper getUsuarioLogadoHelper;
@@ -29,8 +29,7 @@ public class UsuarioController {
         this.getUsuarioLogadoHelper = getUsuarioLogadoHelper;
     }
 
-    @PostMapping()
-    public ResponseEntity<?> createUsuario(@RequestBody CreateUsuarioDto createUsuarioDto){
+    public ResponseEntity<?> createUsuarioBase(CreateUsuarioDto createUsuarioDto){
         try{
             Usuario createdUsuario = usuarioService.createUsuario(createUsuarioDto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdUsuario);
@@ -72,6 +71,7 @@ public class UsuarioController {
     public ResponseEntity<?> getUsuarios(){
         try{
             List<Usuario> usuarios = usuarioService.getUsuarios();
+
             return ResponseEntity.ok().body(usuarios);
         }catch(BusinessException e){
             return ResponseEntity.status(GetHttpCode.getHttpCode(e.getType())).body(e.getMessage());
@@ -81,9 +81,7 @@ public class UsuarioController {
         }
     }
 
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateUsuario(@PathVariable("id") int id, @RequestBody UpdateUsuarioDto updateUsuarioDto){
+    public ResponseEntity<?> updateUsuarioBase(int id, UpdateUsuarioDto updateUsuarioDto){
         try{
             usuarioService.updateUserById(id, updateUsuarioDto);
             return ResponseEntity.ok().body(updateUsuarioDto);

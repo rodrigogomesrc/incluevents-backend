@@ -1,4 +1,4 @@
-package br.ufrn.imd.incluevents.framework.service;
+package br.ufrn.imd.incluevents.natal.service;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 
 import br.ufrn.imd.incluevents.framework.model.Estabelecimento;
+import br.ufrn.imd.incluevents.framework.service.EventScraper;
+import br.ufrn.imd.incluevents.framework.service.SeleniumPageRetriever;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

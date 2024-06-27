@@ -1,16 +1,13 @@
 package br.ufrn.imd.incluevents.framework.config;
 
-import br.ufrn.imd.incluevents.framework.model.Evento;
 import br.ufrn.imd.incluevents.framework.service.EventoService;
-import br.ufrn.imd.incluevents.framework.service.IngresseScraperImpl;
-import br.ufrn.imd.incluevents.framework.service.OutgoScraperImpl;
-import br.ufrn.imd.incluevents.framework.service.SymplaScraperImpl;
+import br.ufrn.imd.incluevents.natal.service.IngresseScraperImpl;
+import br.ufrn.imd.incluevents.natal.service.OutgoScraperImpl;
+import br.ufrn.imd.incluevents.natal.service.SymplaScraperImpl;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.List;
 
 @Configuration
 public class Setup implements ApplicationRunner {

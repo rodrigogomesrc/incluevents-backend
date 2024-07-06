@@ -36,7 +36,16 @@ public class SecurityConfiguration {
                 .requestMatchers(HttpMethod.GET, "/usuarios").permitAll()
                 .requestMatchers(HttpMethod.GET, "/upload/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/categorias").permitAll()
-               .anyRequest().authenticated()
+                .requestMatchers("/v3/api-docs",
+                        "/v3/api-docs/**",
+                        "/configuration/ui",
+                        "/swagger-resources",
+                        "/configuration/security",
+                        "/webjars/**",
+                        "/swagger-resources/configuration/ui",
+                        "/swagger-ui.html",
+                        "/swagger-ui/**").permitAll()
+                .anyRequest().authenticated()
             )
             .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
             .build();

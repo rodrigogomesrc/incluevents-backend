@@ -1,6 +1,5 @@
 package br.ufrn.imd.incluevents.framework.model;
 
-import br.ufrn.imd.incluevents.framework.model.enums.TipoUsuarioEnum;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Collection;
 
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "usuario")
 public class Usuario implements UserDetails {
 
@@ -22,10 +22,6 @@ public class Usuario implements UserDetails {
 
     @JsonIgnore
     private String senha;
-    private int reputacao;
-
-    @Enumerated(EnumType.STRING)
-    private TipoUsuarioEnum tipo;
 
     public Usuario() {
     }
@@ -66,14 +62,6 @@ public class Usuario implements UserDetails {
         this.senha = senha;
     }
 
-    public int getReputacao() {
-        return reputacao;
-    }
-
-    public void setReputacao(int reputacao) {
-        this.reputacao = reputacao;
-    }
-
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -88,14 +76,6 @@ public class Usuario implements UserDetails {
 
     public String getUsername() {
         return username;
-    }
-
-    public TipoUsuarioEnum getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(TipoUsuarioEnum tipo) {
-        this.tipo = tipo;
     }
 
     @Override

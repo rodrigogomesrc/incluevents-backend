@@ -10,13 +10,14 @@ import br.ufrn.imd.incluevents.framework.exceptions.enums.ExceptionTypesEnum;
 import br.ufrn.imd.incluevents.framework.model.Selo;
 import br.ufrn.imd.incluevents.framework.model.VotacaoSelo;
 import br.ufrn.imd.incluevents.framework.model.Usuario;
-import br.ufrn.imd.incluevents.framework.model.enums.TipoUsuarioEnum;
 import br.ufrn.imd.incluevents.framework.repository.VotacaoSeloRepository;
 import br.ufrn.imd.incluevents.framework.service.EstabelecimentoService;
 import br.ufrn.imd.incluevents.framework.service.EventoService;
 import br.ufrn.imd.incluevents.framework.service.SeloService;
 import br.ufrn.imd.incluevents.framework.service.UsuarioService;
 import br.ufrn.imd.incluevents.framework.service.VotacaoSeloService;
+import br.ufrn.imd.incluevents.natal.model.UsuarioNatal;
+import br.ufrn.imd.incluevents.natal.model.enums.TipoUsuarioEnumNatal;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -39,14 +40,39 @@ public class VotacaoSeloServiceNatal extends VotacaoSeloService {
     @Override
     public VotacaoSelo create(CreateVotacaoSeloDto createVotacaoSeloDto, Usuario usuario) throws BusinessException {
         System.out.println("Criando Votação Selo Natal");
+        Selo selo;
+        UsuarioNatal usuarioNatal = (UsuarioNatal) usuario;
 
-        return super.create(createVotacaoSeloDto, usuario);
+        if (createVotacaoSeloDto.idEvento() != null) {
+            selo = seloService.createToEventoIfNotExists(createVotacaoSeloDto.idEvento(), createVotacaoSeloDto.tipoSelo());
+        } else {
+            selo = seloService.createToEstabelecimentoIfNotExists(createVotacaoSeloDto.idEstabelecimento(), createVotacaoSeloDto.tipoSelo());
+        }
+
+        if (selo.getValidado()) {
+            throw new BusinessException("Selo já validado", ExceptionTypesEnum.CONFLICT);
+        }
+
+        if (votacaoSeloRepository.findByUsuarioAndSelo(usuarioNatal, selo).isPresent()) {
+            throw new BusinessException("Votação do selo já criada", ExceptionTypesEnum.CONFLICT);
+        }
+
+        VotacaoSelo votacaoSelo = new VotacaoSelo();
+
+        votacaoSelo.setDescricao(createVotacaoSeloDto.descricao());
+        votacaoSelo.setPossuiSelo(createVotacaoSeloDto.possuiSelo());
+        votacaoSelo.setScore(usuarioNatal.getReputacao());
+        votacaoSelo.setSelo(selo);
+        votacaoSelo.setUsuario(usuarioNatal);
+
+        return super.createVotacaoSelo(votacaoSelo);
     }
 
     @Override
     @Transactional
     public void validateVotacao(final ValidateVotacaoDto validateVotacaoDto, Usuario usuario) throws BusinessException {
-        if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
+        UsuarioNatal usuarioNatal = (UsuarioNatal) usuario;
+        if (usuarioNatal.getTipo() != TipoUsuarioEnumNatal.PREFEITURA) {
             throw new BusinessException("Você não tem acesso a esse recurso", ExceptionTypesEnum.FORBIDDEN);
         }
 
@@ -79,7 +105,7 @@ public class VotacaoSeloServiceNatal extends VotacaoSeloService {
     }
 
     private void processVotacao(VotacaoSelo votacaoSelo, ValidateVotacaoDto validateVotacaoDto) {
-        Usuario usuarioVotacao = votacaoSelo.getUsuario();
+        UsuarioNatal usuarioVotacao = (UsuarioNatal) votacaoSelo.getUsuario();
 
         int reputacao = usuarioVotacao.getReputacao() + (votacaoSelo.getPossuiSelo() == validateVotacaoDto.possuiSelo() ? 5 : -3);
         UsuarioServiceNatal usuarioServiceNatal = (UsuarioServiceNatal) this.usuarioService;
@@ -88,7 +114,8 @@ public class VotacaoSeloServiceNatal extends VotacaoSeloService {
 
     @Override
     public List<EventoGrupoVotacaoSeloDto> getValidacoesPendentesByEvento(Usuario usuario) throws BusinessException {
-        if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
+        UsuarioNatal usuarioNatal = (UsuarioNatal) usuario;
+        if (usuarioNatal.getTipo() != TipoUsuarioEnumNatal.PREFEITURA) {
             throw new BusinessException("Você não tem acesso a esse recurso", ExceptionTypesEnum.FORBIDDEN);
         }
 
@@ -109,7 +136,8 @@ public class VotacaoSeloServiceNatal extends VotacaoSeloService {
 
     @Override
     public List<EstabelecimentoGrupoVotacaoSeloDto> getValidacoesPendentesByEstabelecimento(Usuario usuario) throws BusinessException {
-        if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
+        UsuarioNatal usuarioNatal = (UsuarioNatal) usuario;
+        if (usuarioNatal.getTipo() != TipoUsuarioEnumNatal.PREFEITURA) {
             throw new BusinessException("Você não tem acesso a esse recurso", ExceptionTypesEnum.FORBIDDEN);
         }
         return estabelecimentoService

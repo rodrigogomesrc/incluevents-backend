@@ -1,7 +1,6 @@
 package br.ufrn.imd.incluevents.framework.service;
 
 import br.ufrn.imd.incluevents.framework.exceptions.BusinessException;
-import br.ufrn.imd.incluevents.framework.exceptions.EventoNotFoundException;
 import br.ufrn.imd.incluevents.framework.exceptions.enums.ExceptionTypesEnum;
 import br.ufrn.imd.incluevents.framework.model.Evento;
 import br.ufrn.imd.incluevents.framework.model.enums.OrigemEventoEnum;

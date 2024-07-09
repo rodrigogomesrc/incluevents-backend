@@ -17,7 +17,6 @@ import br.ufrn.imd.incluevents.framework.model.Selo;
 import br.ufrn.imd.incluevents.framework.model.Usuario;
 import br.ufrn.imd.incluevents.framework.model.VotacaoSelo;
 import br.ufrn.imd.incluevents.framework.model.enums.TipoSeloEnum;
-import br.ufrn.imd.incluevents.framework.model.enums.TipoUsuarioEnum;
 import br.ufrn.imd.incluevents.framework.repository.VotacaoSeloRepository;
 import jakarta.transaction.Transactional;
 
@@ -45,38 +44,13 @@ public abstract class VotacaoSeloService {
     }
 
     @Transactional
-    public VotacaoSelo create(CreateVotacaoSeloDto createVotacaoSeloDto, Usuario usuario) throws
+    public VotacaoSelo createVotacaoSelo(VotacaoSelo votacaoSelo) throws
             BusinessException {
-        validateCreateDto(createVotacaoSeloDto);
-
-        Selo selo;
-
-        if (createVotacaoSeloDto.idEvento() != null) {
-            selo = seloService.createToEventoIfNotExists(createVotacaoSeloDto.idEvento(), createVotacaoSeloDto.tipoSelo());
-        } else {
-            selo = seloService.createToEstabelecimentoIfNotExists(createVotacaoSeloDto.idEstabelecimento(), createVotacaoSeloDto.tipoSelo());
-        }
-
-        if (selo.getValidado()) {
-            throw new BusinessException("Selo já validado", ExceptionTypesEnum.CONFLICT);
-        }
-
-        if (votacaoSeloRepository.findByUsuarioAndSelo(usuario, selo).isPresent()) {
-            throw new BusinessException("Votação do selo já criada", ExceptionTypesEnum.CONFLICT);
-        }
-
-        VotacaoSelo votacaoSelo = new VotacaoSelo();
-
-        votacaoSelo.setDescricao(createVotacaoSeloDto.descricao());
-        votacaoSelo.setPossuiSelo(createVotacaoSeloDto.possuiSelo());
-        votacaoSelo.setScore(usuario.getReputacao());
-        votacaoSelo.setSelo(selo);
-        votacaoSelo.setUsuario(usuario);
 
         return votacaoSeloRepository.save(votacaoSelo);
     }
 
-    private void validateCreateDto(CreateVotacaoSeloDto createVotacaoSeloDto) throws BusinessException {
+    protected void validateCreateDto(CreateVotacaoSeloDto createVotacaoSeloDto) throws BusinessException {
         List<String> errors = new ArrayList<>();
 
         if (createVotacaoSeloDto.idEvento() == null && createVotacaoSeloDto.idEstabelecimento() == null) {
@@ -181,6 +155,8 @@ public abstract class VotacaoSeloService {
                 })
                 .collect(Collectors.toList());
     }
+
+    public abstract VotacaoSelo create(CreateVotacaoSeloDto createVotacaoSeloDto, Usuario usuario) throws BusinessException;
 
     @Transactional
     public abstract void validateVotacao(final ValidateVotacaoDto validateVotacaoDto, Usuario usuario) throws BusinessException;

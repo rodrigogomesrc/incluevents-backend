@@ -20,8 +20,27 @@ public abstract class UsuarioService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    public Usuario createUsuario(CreateUsuarioDto createUsuarioDto) throws BusinessException {
+    protected void parseDtoToEntity(CreateUsuarioDto createUsuarioDto, Usuario usuario) throws BusinessException {
+        if(createUsuarioDto.email() == null || createUsuarioDto.nome() == null || createUsuarioDto.username() == null || createUsuarioDto.senha() == null){
+            throw new BusinessException("Deve ter nome, email, username e senha para o cadastro", ExceptionTypesEnum.BAD_REQUEST);
+        }
 
+        usuario.setNome(createUsuarioDto.nome());
+        usuario.setUsername(createUsuarioDto.username());
+        usuario.setEmail(createUsuarioDto.email());
+    }
+
+    protected void parseDtoToEntity(UpdateUsuarioDto createUsuarioDto, Usuario usuario) throws BusinessException {
+        usuario.setNome(createUsuarioDto.nome());
+        usuario.setUsername(createUsuarioDto.username());
+    }
+
+    protected abstract Usuario parseDtoToEntity(CreateUsuarioDto createUsuarioDto) throws BusinessException;
+
+    protected abstract Usuario parseDtoToEntity(UpdateUsuarioDto updateUsuarioDto) throws BusinessException;
+
+    public Usuario createUsuario(CreateUsuarioDto createUsuarioDto) throws BusinessException {
+        Usuario usuario = this.parseDtoToEntity(createUsuarioDto);
 
         if(createUsuarioDto.email() == null || createUsuarioDto.nome() == null || createUsuarioDto.username() == null || createUsuarioDto.senha() == null){
             throw new BusinessException("Deve ter nome, email, username e senha para o cadastro", ExceptionTypesEnum.BAD_REQUEST);
@@ -35,13 +54,7 @@ public abstract class UsuarioService {
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(createUsuarioDto.senha());
 
-        Usuario usuario = new Usuario();
-        usuario.setNome(createUsuarioDto.nome());
-        usuario.setUsername(createUsuarioDto.username());
-        usuario.setEmail(createUsuarioDto.email());
         usuario.setSenha(encryptedPassword);
-        usuario.setReputacao(50);
-        usuario.setTipo(createUsuarioDto.tipo());
 
         return usuarioRepository.save(usuario);
     }
@@ -75,11 +88,6 @@ public abstract class UsuarioService {
         return usuarios;
     }
     public void updateUserById(int id, UpdateUsuarioDto updateUsuarioDto) throws BusinessException {
-
-        if(updateUsuarioDto.reputacao() != null && updateUsuarioDto.reputacao() < 0){
-            throw new BusinessException("O valor para o parâmetro reputação é inválido.", ExceptionTypesEnum.BAD_REQUEST);
-        }
-
         Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
 
         if(!usuarioOptional.isPresent()){
@@ -101,10 +109,6 @@ public abstract class UsuarioService {
             usuario.setSenha(encryptedPassword);
         }
 
-        if (updateUsuarioDto.reputacao() != null) {
-            usuario.setReputacao( updateUsuarioDto.reputacao() );
-        }
-
         usuarioRepository.save(usuario);
     }
 
@@ -116,6 +120,4 @@ public abstract class UsuarioService {
         }
         usuarioRepository.deleteById(id);
     }
-
-    public abstract void validate(Usuario usuario);
 }

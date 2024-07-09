@@ -4,5 +4,7 @@ public enum OrigemEventoEnum {
     OUTGO,
     SYMPLA,
     INGRESSE,
+    UFPB,
+    MARACANA,
     CADASTRO;
 }

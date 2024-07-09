@@ -54,10 +54,6 @@ public abstract class UsuarioService {
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(createUsuarioDto.senha());
 
-        // Adicionar em método da subclasse
-        // usuario.setReputacao(50);
-        // usuario.setTipo(createUsuarioDto.tipo());
-
         usuario.setSenha(encryptedPassword);
 
         return usuarioRepository.save(usuario);

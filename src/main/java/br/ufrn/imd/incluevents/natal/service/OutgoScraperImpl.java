@@ -1,9 +1,11 @@
-package br.ufrn.imd.incluevents.framework.service;
+package br.ufrn.imd.incluevents.natal.service;
 
 import br.ufrn.imd.incluevents.framework.model.Categoria;
 import br.ufrn.imd.incluevents.framework.model.Estabelecimento;
 import br.ufrn.imd.incluevents.framework.model.Evento;
 import br.ufrn.imd.incluevents.framework.model.enums.OrigemEventoEnum;
+import br.ufrn.imd.incluevents.framework.service.EventScraper;
+import br.ufrn.imd.incluevents.framework.service.SeleniumPageRetriever;
 import br.ufrn.imd.incluevents.framework.util.UrlExtractor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

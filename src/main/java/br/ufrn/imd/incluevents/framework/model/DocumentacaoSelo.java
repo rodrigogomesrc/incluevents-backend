@@ -3,6 +3,7 @@ package br.ufrn.imd.incluevents.framework.model;
 import jakarta.persistence.*;
 
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "documentacao_selo")
 public class DocumentacaoSelo {
     @Id

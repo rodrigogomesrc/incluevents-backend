@@ -24,14 +24,14 @@ import br.ufrn.imd.incluevents.framework.repository.DocumentacaoSeloRepository;
 import jakarta.transaction.Transactional;
 
 @Service
-public class DocumentacaoSeloService {
-    private final DocumentacaoSeloRepository documentacaoSeloRepository;
+public abstract class DocumentacaoSeloService {
+    protected final DocumentacaoSeloRepository documentacaoSeloRepository;
 
-    private final SeloService seloService;
-    private final StorageService storageService;
-    private final EventoService eventoService;
-    private final EstabelecimentoService estabelecimentoService;
-    private final VotacaoSeloService votacaoSeloService;
+    protected final SeloService seloService;
+    protected final StorageService storageService;
+    protected final EventoService eventoService;
+    protected final EstabelecimentoService estabelecimentoService;
+    protected final VotacaoSeloService votacaoSeloService;
 
     public DocumentacaoSeloService(
         DocumentacaoSeloRepository documentacaoSeloRepository,
@@ -48,6 +48,10 @@ public class DocumentacaoSeloService {
         this.eventoService = eventoService;
         this.estabelecimentoService = estabelecimentoService;
         this.votacaoSeloService = votacaoSeloService;
+    }
+
+    protected DocumentacaoSelo instantiate() {
+        return new DocumentacaoSelo();
     }
 
     private void validateDto(CreateDocumentacaoSeloDto createDocumentacaoSeloDto) throws BusinessException {
@@ -140,7 +144,7 @@ public class DocumentacaoSeloService {
 
         String nomeArquivo = storageService.store(createDocumentacaoSeloDto.arquivo());
 
-        DocumentacaoSelo documentacaoSelo = new DocumentacaoSelo();
+        DocumentacaoSelo documentacaoSelo = this.instantiate();
 
         documentacaoSelo.setSelo(selo);
         documentacaoSelo.setUsuario(usuario);
@@ -248,6 +252,14 @@ public class DocumentacaoSeloService {
             .collect(Collectors.toList());
     }
 
+    public DocumentacaoSelo getById(int idDocumentacao) throws BusinessException {
+        DocumentacaoSelo documentacaoSelo = documentacaoSeloRepository.findById(idDocumentacao).orElseThrow(() ->
+            new BusinessException("Documentação não encontrada", ExceptionTypesEnum.NOT_FOUND)
+        );
+
+        return documentacaoSelo;
+    }
+
     @Transactional
     public void validateDocumentacao(ValidateDocumentacaoDto validateDocumentacaoDto, Usuario usuario) throws BusinessException {
         /*if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
@@ -256,9 +268,7 @@ public class DocumentacaoSeloService {
 
         validateDto(validateDocumentacaoDto);
 
-        DocumentacaoSelo documentacaoSelo = documentacaoSeloRepository.findById(validateDocumentacaoDto.idDocumentacao()).orElseThrow(() ->
-            new BusinessException("Documentação não encontrada", ExceptionTypesEnum.NOT_FOUND)
-        );
+        DocumentacaoSelo documentacaoSelo = this.getById(validateDocumentacaoDto.idDocumentacao());
 
         if (documentacaoSelo.getValida() != null) {
             throw new BusinessException("Documentação já validada", ExceptionTypesEnum.CONFLICT);

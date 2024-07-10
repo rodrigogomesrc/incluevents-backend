@@ -80,5 +80,7 @@ public class UsuarioServiceMaracana extends UsuarioService {
         }
 
         usuarioMaracana.setDocumentacaoValida(validateDocumentacaoUsuarioDtoMaracana.documentacaoValida());
+
+        this.usuarioRepository.save(usuarioMaracana);
     }
 }

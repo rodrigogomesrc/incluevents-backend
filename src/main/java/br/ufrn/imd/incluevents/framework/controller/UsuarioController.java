@@ -20,9 +20,9 @@ import org.slf4j.LoggerFactory;
 @CrossOrigin(origins = "http://localhost:3000")
 public abstract class UsuarioController {
 
-    private final UsuarioService usuarioService;
-    private final GetUsuarioLogadoHelper getUsuarioLogadoHelper;
-    private static final Logger logger = LoggerFactory.getLogger(UsuarioController.class);
+    protected final UsuarioService usuarioService;
+    protected final GetUsuarioLogadoHelper getUsuarioLogadoHelper;
+    protected static final Logger logger = LoggerFactory.getLogger(UsuarioController.class);
 
     public UsuarioController(UsuarioService usuarioService, GetUsuarioLogadoHelper getUsuarioLogadoHelper){
         this.usuarioService = usuarioService;

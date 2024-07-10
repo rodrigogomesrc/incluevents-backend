@@ -9,6 +9,7 @@ import br.ufrn.imd.incluevents.framework.repository.UsuarioRepository;
 import br.ufrn.imd.incluevents.framework.service.StorageService;
 import br.ufrn.imd.incluevents.framework.service.UsuarioService;
 import br.ufrn.imd.incluevents.macarana.dtos.CreateUsuarioDtoMaracana;
+import br.ufrn.imd.incluevents.macarana.dtos.ValidateDocumentacaoUsuarioDtoMaracana;
 import br.ufrn.imd.incluevents.macarana.model.UsuarioMaracana;
 import br.ufrn.imd.incluevents.macarana.model.enums.TipoUsuarioEnumMaracana;
 
@@ -59,5 +60,25 @@ public class UsuarioServiceMaracana extends UsuarioService {
         super.parseDtoToEntity(updateUsuarioDto, usuarioMaracana);
 
         return usuarioMaracana;
+    }
+
+    public void validateDocumentacao(ValidateDocumentacaoUsuarioDtoMaracana validateDocumentacaoUsuarioDtoMaracana, UsuarioMaracana usuarioLogado) throws BusinessException {
+        if (validateDocumentacaoUsuarioDtoMaracana.idUsuario() == null || validateDocumentacaoUsuarioDtoMaracana.documentacaoValida() == null) {
+            throw new BusinessException("Deve ter idUsuario e documentacaoValida", ExceptionTypesEnum.BAD_REQUEST);
+        }
+
+        if (usuarioLogado == null || usuarioLogado.getTipo() != TipoUsuarioEnumMaracana.ORGAO_VALIDACAO) {
+            throw new BusinessException("Você não tem autorização", ExceptionTypesEnum.FORBIDDEN);
+        }
+
+        UsuarioMaracana usuarioMaracana = (UsuarioMaracana) this.getUsuarioById(validateDocumentacaoUsuarioDtoMaracana.idUsuario());
+
+        if (usuarioMaracana.getTipo() != TipoUsuarioEnumMaracana.ESPECIALISTA) {
+            throw new BusinessException("Não pode validar documentação para não-especialista", ExceptionTypesEnum.BAD_REQUEST);
+        } else if (usuarioMaracana.getDocumentacaoValida() != null) {
+            throw new BusinessException("Documentação já validada", ExceptionTypesEnum.BAD_REQUEST);
+        }
+
+        usuarioMaracana.setDocumentacaoValida(validateDocumentacaoUsuarioDtoMaracana.documentacaoValida());
     }
 }

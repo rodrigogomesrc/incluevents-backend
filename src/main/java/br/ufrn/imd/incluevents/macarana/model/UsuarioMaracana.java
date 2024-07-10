@@ -19,7 +19,7 @@ public class UsuarioMaracana extends Usuario {
 
     private String nomeDocumentacao;
     private String urlDocumentacao;
-    private Boolean documentacaoValidada;
+    private Boolean documentacaoValida;
 
     public TipoUsuarioEnumMaracana getTipo() {
         return this.tipo;
@@ -53,11 +53,11 @@ public class UsuarioMaracana extends Usuario {
 		this.urlDocumentacao = urlDocumentacao;
 	}
 
-    public Boolean getDocumentacaoValidada() {
-      return documentacaoValidada;
+    public Boolean getDocumentacaoValida() {
+      return documentacaoValida;
     }
 
-    public void setDocumentacaoValidada(Boolean documentacaoValidada) {
-      this.documentacaoValidada = documentacaoValidada;
+    public void setDocumentacaoValida(Boolean documentacaoValida) {
+      this.documentacaoValida = documentacaoValida;
     }
 }

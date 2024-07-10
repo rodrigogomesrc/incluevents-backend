@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import br.ufrn.imd.incluevents.framework.dto.CreateVotacaoSeloDto;
 import br.ufrn.imd.incluevents.framework.dto.EstabelecimentoGrupoVotacaoSeloDto;
 import br.ufrn.imd.incluevents.framework.dto.EventoGrupoVotacaoSeloDto;
+import br.ufrn.imd.incluevents.framework.dto.GrupoVotacaoSeloDto;
 import br.ufrn.imd.incluevents.framework.dto.ValidateVotacaoDto;
 import br.ufrn.imd.incluevents.framework.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.framework.exceptions.enums.ExceptionTypesEnum;
@@ -156,12 +157,111 @@ public abstract class VotacaoSeloService {
                 .collect(Collectors.toList());
     }
 
-    public abstract VotacaoSelo create(CreateVotacaoSeloDto createVotacaoSeloDto, Usuario usuario) throws BusinessException;
+    public VotacaoSelo create(CreateVotacaoSeloDto createVotacaoSeloDto, Usuario usuario) throws BusinessException {
+        Selo selo;
+
+        if (createVotacaoSeloDto.idEvento() != null) {
+            selo = seloService.createToEventoIfNotExists(createVotacaoSeloDto.idEvento(), createVotacaoSeloDto.tipoSelo());
+        } else {
+            selo = seloService.createToEstabelecimentoIfNotExists(createVotacaoSeloDto.idEstabelecimento(), createVotacaoSeloDto.tipoSelo());
+        }
+
+        if (selo.getValidado()) {
+            throw new BusinessException("Selo já validado", ExceptionTypesEnum.CONFLICT);
+        }
+
+        if (votacaoSeloRepository.findByUsuarioAndSelo(usuario, selo).isPresent()) {
+            throw new BusinessException("Votação do selo já criada", ExceptionTypesEnum.CONFLICT);
+        }
+
+        VotacaoSelo votacaoSelo = new VotacaoSelo();
+
+        votacaoSelo.setDescricao(createVotacaoSeloDto.descricao());
+        votacaoSelo.setPossuiSelo(createVotacaoSeloDto.possuiSelo());
+        votacaoSelo.setScore(this.calculateCredibilidate(usuario));
+        votacaoSelo.setSelo(selo);
+        votacaoSelo.setUsuario(usuario);
+
+        return this.votacaoSeloRepository.save(votacaoSelo);
+    }
 
     @Transactional
-    public abstract void validateVotacao(final ValidateVotacaoDto validateVotacaoDto, Usuario usuario) throws BusinessException;
+    public void validateVotacao(final ValidateVotacaoDto validateVotacaoDto, Usuario usuario) throws BusinessException {
+        if (!this.checkIfCanValidate(usuario)) {
+            throw new BusinessException("Você não tem autorização", ExceptionTypesEnum.FORBIDDEN);
+        }
 
-    public abstract List<EventoGrupoVotacaoSeloDto> getValidacoesPendentesByEvento(Usuario usuario) throws BusinessException;
+        validateVotacaoDto(validateVotacaoDto);
 
-    public abstract List<EstabelecimentoGrupoVotacaoSeloDto> getValidacoesPendentesByEstabelecimento(Usuario usuario) throws BusinessException;
+        Selo selo = seloService.getById(validateVotacaoDto.idSelo());
+
+        if (selo.getValidado()) {
+            throw new BusinessException("Selo já validado", ExceptionTypesEnum.CONFLICT);
+        }
+
+        List<VotacaoSelo> votacoesSelo = votacaoSeloRepository.findBySelo(selo);
+
+        votacoesSelo
+                .stream()
+                .parallel()
+                .forEach(votacaoSelo -> {
+                    if (votacaoSelo.getVerificado()) {
+                        return;
+                    }
+
+                    votacaoSelo.setVerificado(true);
+                    this.processValidacao(votacaoSelo, validateVotacaoDto);
+
+                });
+
+        if (validateVotacaoDto.possuiSelo()) {
+            seloService.validateSelo(selo);
+        }
+    }
+
+    public List<EventoGrupoVotacaoSeloDto> getValidacoesPendentesByEvento(Usuario usuario) throws BusinessException {
+        if (!this.checkIfCanValidate(usuario)) {
+            throw new BusinessException("Você não tem autorização", ExceptionTypesEnum.FORBIDDEN);
+        }
+
+        return eventoService
+                .findAll()
+                .stream()
+                .parallel()
+                .map(evento -> {
+                    List<GrupoVotacaoSeloDto> gruposVotacaoSelo = votacaoSeloRepository.findValidacoesPendentesByEvento(evento.getId());
+
+                    return new EventoGrupoVotacaoSeloDto(evento, gruposVotacaoSelo);
+                })
+                .filter(item -> {
+                    return item.getGruposVotacaoSelo().size() > 0;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public List<EstabelecimentoGrupoVotacaoSeloDto> getValidacoesPendentesByEstabelecimento(Usuario usuario) throws BusinessException {
+        if (!this.checkIfCanValidate(usuario)) {
+            throw new BusinessException("Você não tem autorização", ExceptionTypesEnum.FORBIDDEN);
+        }
+
+        return estabelecimentoService
+                .findAll()
+                .stream()
+                .parallel()
+                .map(estabelecimento -> {
+                    List<GrupoVotacaoSeloDto> gruposVotacaoSelo = votacaoSeloRepository.findValidacoesPendentesByEstabelecimento(estabelecimento.getId());
+
+                    return new EstabelecimentoGrupoVotacaoSeloDto(estabelecimento, gruposVotacaoSelo);
+                })
+                .filter(item -> {
+                    return item.getGruposVotacaoSelo().size() > 0;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public abstract boolean checkIfCanValidate(Usuario usuario) throws BusinessException;
+
+    public abstract int calculateCredibilidate(Usuario usuario) throws BusinessException;
+
+    public void processValidacao(VotacaoSelo votacaoSelo, ValidateVotacaoDto validateVotacaoDto) {}
 }

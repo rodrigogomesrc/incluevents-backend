@@ -9,6 +9,8 @@ import br.ufrn.imd.incluevents.framework.repository.UsuarioRepository;
 import br.ufrn.imd.incluevents.framework.service.UsuarioService;
 import br.ufrn.imd.incluevents.ufpb.dto.CreateUsuarioDtoUfpb;
 import br.ufrn.imd.incluevents.ufpb.model.UsuarioUfpb;
+import br.ufrn.imd.incluevents.ufpb.model.enums.TipoUsuarioEnumUfpb;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,6 +25,12 @@ public class UsuarioServiceUfpb extends UsuarioService {
 
         if (createUsuarioDtoUfpb.tipo() == null) {
             throw new BusinessException("Usuário deve ter tipo", ExceptionTypesEnum.BAD_REQUEST);
+        }
+
+        if (createUsuarioDtoUfpb.tipo() == TipoUsuarioEnumUfpb.SERVIDOR) {
+            if (createUsuarioDtoUfpb.cargo() == null || createUsuarioDtoUfpb.tempoServico() == null) {
+                throw new BusinessException("Deve ter cargo e tempo de serviço", ExceptionTypesEnum.BAD_REQUEST);
+            }
         }
 
         UsuarioUfpb usuarioUfpb = new UsuarioUfpb();

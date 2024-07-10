@@ -17,6 +17,10 @@ public class UsuarioMaracana extends Usuario {
     @Enumerated(EnumType.STRING)
     private TipoUsuarioEnumMaracana tipo;
 
+    private String nomeDocumentacao;
+    private String urlDocumentacao;
+    private Boolean documentacaoValidada;
+
     public TipoUsuarioEnumMaracana getTipo() {
         return this.tipo;
     }
@@ -31,5 +35,29 @@ public class UsuarioMaracana extends Usuario {
 
     public void setCriadoEm(Date criadoEm) {
         this.criadoEm = criadoEm;
+    }
+
+    public String getNomeDocumentacao() {
+		return this.nomeDocumentacao;
+	}
+
+	public void setNomeDocumentacao(String nomeDocumentacao) {
+		this.nomeDocumentacao = nomeDocumentacao;
+	}
+
+	public String getUrlDocumentacao() {
+		return this.urlDocumentacao;
+	}
+
+	public void setUrlDocumentacao(String urlDocumentacao) {
+		this.urlDocumentacao = urlDocumentacao;
+	}
+
+    public Boolean getDocumentacaoValidada() {
+      return documentacaoValidada;
+    }
+
+    public void setDocumentacaoValidada(Boolean documentacaoValidada) {
+      this.documentacaoValidada = documentacaoValidada;
     }
 }

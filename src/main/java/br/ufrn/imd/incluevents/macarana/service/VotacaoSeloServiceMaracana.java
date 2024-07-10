@@ -1,8 +1,6 @@
-package br.ufrn.imd.incluevents.natal.service;
+package br.ufrn.imd.incluevents.macarana.service;
 
-import br.ufrn.imd.incluevents.framework.dto.ValidateVotacaoDto;
 import br.ufrn.imd.incluevents.framework.exceptions.BusinessException;
-import br.ufrn.imd.incluevents.framework.model.VotacaoSelo;
 import br.ufrn.imd.incluevents.framework.model.Usuario;
 import br.ufrn.imd.incluevents.framework.repository.VotacaoSeloRepository;
 import br.ufrn.imd.incluevents.framework.service.EstabelecimentoService;
@@ -10,14 +8,19 @@ import br.ufrn.imd.incluevents.framework.service.EventoService;
 import br.ufrn.imd.incluevents.framework.service.SeloService;
 import br.ufrn.imd.incluevents.framework.service.UsuarioService;
 import br.ufrn.imd.incluevents.framework.service.VotacaoSeloService;
-import br.ufrn.imd.incluevents.natal.model.UsuarioNatal;
-import br.ufrn.imd.incluevents.natal.model.enums.TipoUsuarioEnumNatal;
+import br.ufrn.imd.incluevents.macarana.model.UsuarioMaracana;
+import br.ufrn.imd.incluevents.macarana.model.enums.TipoUsuarioEnumMaracana;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+
 import org.springframework.stereotype.Service;
 
 @Service
-public class VotacaoSeloServiceNatal extends VotacaoSeloService {
+public class VotacaoSeloServiceMaracana extends VotacaoSeloService {
 
-    public VotacaoSeloServiceNatal(
+    public VotacaoSeloServiceMaracana(
             VotacaoSeloRepository votacaoSeloRepository,
             SeloService seloService,
             UsuarioService usuarioService,
@@ -29,24 +32,24 @@ public class VotacaoSeloServiceNatal extends VotacaoSeloService {
 
     @Override
     public boolean checkIfCanValidate(Usuario usuario) throws BusinessException {
-        UsuarioNatal usuarioNatal = (UsuarioNatal) usuario;
+        UsuarioMaracana usuarioMaracana = (UsuarioMaracana) usuario;
 
-        return usuarioNatal.getTipo() == TipoUsuarioEnumNatal.PREFEITURA;
+        return usuarioMaracana.getTipo() == TipoUsuarioEnumMaracana.ORGAO_VALIDACAO;
     }
 
     @Override
     public int calculateCredibilidate(Usuario usuario) throws BusinessException {
-        UsuarioNatal usuarioNatal = (UsuarioNatal) usuario;
+        UsuarioMaracana usuarioMaracana = (UsuarioMaracana) usuario;
 
-        return usuarioNatal.getReputacao();
-    }
+        LocalDate date = usuarioMaracana.getCriadoEm().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate today = LocalDate.now();
 
-    @Override
-    public void processValidacao(VotacaoSelo votacaoSelo, ValidateVotacaoDto validateVotacaoDto) {
-        UsuarioNatal usuarioVotacao = (UsuarioNatal) votacaoSelo.getUsuario();
+        int acrescimo = (int) Math.floor(50 + ChronoUnit.DAYS.between(date, today) / 60.0);
 
-        int reputacao = usuarioVotacao.getReputacao() + (votacaoSelo.getPossuiSelo() == validateVotacaoDto.possuiSelo() ? 5 : -3);
-        UsuarioServiceNatal usuarioServiceNatal = (UsuarioServiceNatal) this.usuarioService;
-        usuarioServiceNatal.updateReputacao(usuarioVotacao, reputacao);
+        if (usuarioMaracana.getTipo() == TipoUsuarioEnumMaracana.ESPECIALISTA) {
+            return 50 + acrescimo;
+        } else  {
+            return 10 + acrescimo;
+        }
     }
 }

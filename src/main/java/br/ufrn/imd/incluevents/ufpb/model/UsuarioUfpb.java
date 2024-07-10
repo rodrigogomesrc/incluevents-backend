@@ -1,6 +1,7 @@
 package br.ufrn.imd.incluevents.ufpb.model;
 
 import br.ufrn.imd.incluevents.framework.model.Usuario;
+import br.ufrn.imd.incluevents.ufpb.model.enums.CargoEnumUfpb;
 import br.ufrn.imd.incluevents.ufpb.model.enums.TipoUsuarioEnumUfpb;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,7 +11,9 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "usuario_ufpb")
 public class UsuarioUfpb extends Usuario {
-    private String cargo;
+    @Enumerated(EnumType.STRING)
+    private CargoEnumUfpb cargo;
+
     private int tempoServico;
 
     @Enumerated(EnumType.STRING)
@@ -24,11 +27,11 @@ public class UsuarioUfpb extends Usuario {
         this.tipo = tipo;
     }
 
-    public String getCargo() {
+    public CargoEnumUfpb getCargo() {
         return this.cargo;
     }
 
-    public void setCargo(String cargo) {
+    public void setCargo(CargoEnumUfpb cargo) {
         this.cargo = cargo;
     }
 

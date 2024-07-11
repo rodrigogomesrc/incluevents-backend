@@ -33,10 +33,17 @@ public class UsuarioServiceUfpb extends UsuarioService {
             }
         }
 
+        if (createUsuarioDtoUfpb.tipo() == TipoUsuarioEnumUfpb.ESTUDANTE) {
+            if (createUsuarioDtoUfpb.imc() == null) {
+                throw new BusinessException("Deve ter imc", ExceptionTypesEnum.BAD_REQUEST);
+            }
+        }
+
         UsuarioUfpb usuarioUfpb = new UsuarioUfpb();
 
         super.parseDtoToEntity(createUsuarioDtoUfpb, usuarioUfpb);
 
+        usuarioUfpb.setImc(createUsuarioDtoUfpb.imc());
         usuarioUfpb.setCargo(createUsuarioDtoUfpb.cargo());
         usuarioUfpb.setTempoServico(createUsuarioDtoUfpb.tempoServico());
         usuarioUfpb.setTipo(createUsuarioDtoUfpb.tipo());

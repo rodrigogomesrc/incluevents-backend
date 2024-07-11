@@ -14,7 +14,9 @@ public class UsuarioUfpb extends Usuario {
     @Enumerated(EnumType.STRING)
     private CargoEnumUfpb cargo;
 
-    private int tempoServico;
+    private Double tempoServico;
+
+    private Double imc;
 
     @Enumerated(EnumType.STRING)
     private TipoUsuarioEnumUfpb tipo;
@@ -35,11 +37,18 @@ public class UsuarioUfpb extends Usuario {
         this.cargo = cargo;
     }
 
-    public int getTempoServico() {
+    public Double getTempoServico() {
         return this.tempoServico;
     }
 
-    public void setTempoServico(int tempoServico) {
+    public void setTempoServico(Double tempoServico) {
         this.tempoServico = tempoServico;
+    }
+    public Double getImc() {
+        return this.imc;
+    }
+
+    public void setImc(Double imc) {
+        this.imc = imc;
     }
 }

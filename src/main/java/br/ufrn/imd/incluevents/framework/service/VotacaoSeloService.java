@@ -44,13 +44,6 @@ public abstract class VotacaoSeloService {
         this.estabelecimentoService = estabelecimentoService;
     }
 
-    @Transactional
-    public VotacaoSelo createVotacaoSelo(VotacaoSelo votacaoSelo) throws
-            BusinessException {
-
-        return votacaoSeloRepository.save(votacaoSelo);
-    }
-
     protected void validateCreateDto(CreateVotacaoSeloDto createVotacaoSeloDto) throws BusinessException {
         List<String> errors = new ArrayList<>();
 
@@ -159,6 +152,8 @@ public abstract class VotacaoSeloService {
 
     public VotacaoSelo create(CreateVotacaoSeloDto createVotacaoSeloDto, Usuario usuario) throws BusinessException {
         Selo selo;
+
+        this.validateCreateDto(createVotacaoSeloDto);
 
         if (createVotacaoSeloDto.idEvento() != null) {
             selo = seloService.createToEventoIfNotExists(createVotacaoSeloDto.idEvento(), createVotacaoSeloDto.tipoSelo());

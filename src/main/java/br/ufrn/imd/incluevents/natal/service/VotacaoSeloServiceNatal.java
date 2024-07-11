@@ -48,5 +48,14 @@ public class VotacaoSeloServiceNatal extends VotacaoSeloService {
         int reputacao = usuarioVotacao.getReputacao() + (votacaoSelo.getPossuiSelo() == validateVotacaoDto.possuiSelo() ? 5 : -3);
         UsuarioServiceNatal usuarioServiceNatal = (UsuarioServiceNatal) this.usuarioService;
         usuarioServiceNatal.updateReputacao(usuarioVotacao, reputacao);
+
+
+        /* Deve ir pra classe de sistema específico
+        Usuario usuarioDocumentacao = documentacaoSelo.getUsuario();
+
+        int reputacao = usuarioDocumentacao.getReputacao() + (validateDocumentacaoDto.valida() ? 10 : -10);
+
+        usuarioService.updateReputacao(usuarioDocumentacao, reputacao);
+        */
     }
 }

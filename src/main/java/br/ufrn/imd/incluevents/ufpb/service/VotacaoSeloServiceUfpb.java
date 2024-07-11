@@ -30,7 +30,7 @@ public class VotacaoSeloServiceUfpb extends VotacaoSeloService {
     public boolean checkIfCanValidate(Usuario usuario) throws BusinessException {
         UsuarioUfpb usuarioUfpb = (UsuarioUfpb) usuario;
 
-        return usuarioUfpb.getTipo() == TipoUsuarioEnumUfpb.ORGAO_VALIDACAO;
+        return usuarioUfpb.getTipo() == TipoUsuarioEnumUfpb.SERVIDOR && usuarioUfpb.getCargo() == CargoEnumUfpb.COORDENACAO;
     }
 
     @Override
@@ -39,22 +39,20 @@ public class VotacaoSeloServiceUfpb extends VotacaoSeloService {
 
         if (usuarioUfpb.getTipo() == TipoUsuarioEnumUfpb.ESTUDANTE) {
             return 10;
-        } else if (usuarioUfpb.getTipo() == TipoUsuarioEnumUfpb.SERVIDOR) {
+        } else {
             double ponderacao = 0;
 
             if (usuarioUfpb.getCargo() == CargoEnumUfpb.PROFESSOR) {
-                ponderacao = 0.4;
+                ponderacao = 0.5;
             } else if (usuarioUfpb.getCargo() == CargoEnumUfpb.REITORIA) {
-                ponderacao = 0.7;
+                ponderacao = 0.75;
             } else if (usuarioUfpb.getCargo() == CargoEnumUfpb.COORDENACAO) {
                 ponderacao = 1;
             } else {
-                ponderacao = 0.2;
+                ponderacao = 0.25;
             }
 
-            return (int) Math.floor(15 + usuarioUfpb.getTempoServico() * ponderacao);
-        } else {
-            return 5;
+            return (int) Math.floor(20 + usuarioUfpb.getTempoServico() * ponderacao);
         }
     }
 }

@@ -38,7 +38,19 @@ public class VotacaoSeloServiceUfpb extends VotacaoSeloService {
         UsuarioUfpb usuarioUfpb = (UsuarioUfpb) usuario;
 
         if (usuarioUfpb.getTipo() == TipoUsuarioEnumUfpb.ESTUDANTE) {
-            return 10;
+            int acrescimo = 0;
+
+            if (usuarioUfpb.getImc() >= 5 && usuarioUfpb.getImc() < 6) {
+                acrescimo = 2;
+            } else if (usuarioUfpb.getImc() >= 6 && usuarioUfpb.getImc() < 7) {
+                acrescimo = 3;
+            } else if (usuarioUfpb.getImc() >= 7 && usuarioUfpb.getImc() < 8.5) {
+                acrescimo = 4;
+            } else if (usuarioUfpb.getImc() >= 8.5) {
+                acrescimo = 5;
+            }
+
+            return 10 + acrescimo;
         } else {
             double ponderacao = 0;
 

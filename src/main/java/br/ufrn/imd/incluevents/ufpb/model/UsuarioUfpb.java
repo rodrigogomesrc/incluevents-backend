@@ -16,6 +16,8 @@ public class UsuarioUfpb extends Usuario {
 
     private int tempoServico;
 
+    private double imc;
+
     @Enumerated(EnumType.STRING)
     private TipoUsuarioEnumUfpb tipo;
 
@@ -41,5 +43,12 @@ public class UsuarioUfpb extends Usuario {
 
     public void setTempoServico(int tempoServico) {
         this.tempoServico = tempoServico;
+    }
+    public double getImc() {
+        return this.imc;
+    }
+
+    public void setImc(double imc) {
+        this.imc = imc;
     }
 }

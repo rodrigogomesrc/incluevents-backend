@@ -1,7 +1,7 @@
-package br.ufrn.imd.incluevents.macarana.model;
+package br.ufrn.imd.incluevents.maracana.model;
 
 import br.ufrn.imd.incluevents.framework.model.Usuario;
-import br.ufrn.imd.incluevents.macarana.model.enums.TipoUsuarioEnumMaracana;
+import br.ufrn.imd.incluevents.maracana.model.enums.TipoUsuarioEnumMaracana;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

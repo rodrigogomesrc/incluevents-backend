@@ -33,6 +33,12 @@ public class UsuarioServiceUfpb extends UsuarioService {
             }
         }
 
+        if (createUsuarioDtoUfpb.tipo() == TipoUsuarioEnumUfpb.ESTUDANTE) {
+            if (createUsuarioDtoUfpb.imc() == null) {
+                throw new BusinessException("Deve ter imc", ExceptionTypesEnum.BAD_REQUEST);
+            }
+        }
+
         UsuarioUfpb usuarioUfpb = new UsuarioUfpb();
 
         super.parseDtoToEntity(createUsuarioDtoUfpb, usuarioUfpb);

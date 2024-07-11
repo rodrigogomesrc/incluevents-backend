@@ -33,13 +33,15 @@ public abstract class DocumentacaoSeloService {
     protected final EstabelecimentoService estabelecimentoService;
     protected final VotacaoSeloService votacaoSeloService;
 
+    protected final UsuarioService usuarioService;
+
     public DocumentacaoSeloService(
-        DocumentacaoSeloRepository documentacaoSeloRepository,
-        SeloService seloService,
-        StorageService storageService,
-        EventoService eventoService,
-        EstabelecimentoService estabelecimentoService,
-        VotacaoSeloService votacaoSeloService
+            DocumentacaoSeloRepository documentacaoSeloRepository,
+            SeloService seloService,
+            StorageService storageService,
+            EventoService eventoService,
+            EstabelecimentoService estabelecimentoService,
+            VotacaoSeloService votacaoSeloService, UsuarioService usuarioService
     ) {
         this.documentacaoSeloRepository = documentacaoSeloRepository;
 
@@ -48,6 +50,7 @@ public abstract class DocumentacaoSeloService {
         this.eventoService = eventoService;
         this.estabelecimentoService = estabelecimentoService;
         this.votacaoSeloService = votacaoSeloService;
+        this.usuarioService = usuarioService;
     }
 
     protected DocumentacaoSelo instantiate() {
@@ -111,25 +114,13 @@ public abstract class DocumentacaoSeloService {
         if (createDocumentacaoSeloDto.idEvento() != null) {
             evento = eventoService.getById(createDocumentacaoSeloDto.idEvento());
 
-            Usuario criador = evento.getCriador();
-
-            if (criador != null && criador.getId() != usuario.getId()) {
-                throw new BusinessException("Apenas o criador do evento pode enviar a solicitação de documentação", ExceptionTypesEnum.FORBIDDEN);
-            } else if (criador == null /*&& usuario.getReputacao() < 70 */) {
-                throw new BusinessException("Reputação insuficiente para envio de documentação", ExceptionTypesEnum.FORBIDDEN);
-            }
+            checkIfCanCreate(evento.getCriador(), usuario);
 
             selo = seloService.createToEventoIfNotExists(evento, createDocumentacaoSeloDto.tipoSelo());
         } else {
             estabelecimento = estabelecimentoService.getEstabelecimentoById(createDocumentacaoSeloDto.idEstabelecimento());
 
-            Usuario criador = estabelecimento.getCriador();
-
-            if (criador != null && criador.getId() != usuario.getId()) {
-                throw new BusinessException("Apenas o criador do evento pode enviar a solicitação de documentação", ExceptionTypesEnum.FORBIDDEN);
-            } else if (criador == null /* && usuario.getReputacao() < 70  */) {
-                throw new BusinessException("Reputação insuficiente para envio de documentação", ExceptionTypesEnum.FORBIDDEN);
-            }
+            checkIfCanCreate(estabelecimento.getCriador(), usuario);
 
             selo = seloService.createToEstabelecimentoIfNotExists(estabelecimento, createDocumentacaoSeloDto.tipoSelo());
         }
@@ -213,9 +204,7 @@ public abstract class DocumentacaoSeloService {
     }
 
     public List<EventoDocumentacoesSeloDto> getValidacoesPendentesByEvento(Usuario usuario) throws BusinessException {
-        /*if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
-            throw new BusinessException("Você não tem acesso a esse recurso", ExceptionTypesEnum.FORBIDDEN);
-        }*/
+        checkIfCanValidate(usuario);
 
         return eventoService
             .findAll()
@@ -233,9 +222,7 @@ public abstract class DocumentacaoSeloService {
     }
 
     public List<EstabelecimentoDocumentacaoSeloDto> getValidacoesPendentesByEstabelecimento(Usuario usuario) throws BusinessException {
-        /*if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
-            throw new BusinessException("Você não tem acesso a esse recurso", ExceptionTypesEnum.FORBIDDEN);
-        }*/
+        checkIfCanValidate(usuario);
 
         return estabelecimentoService
             .findAll()
@@ -262,9 +249,7 @@ public abstract class DocumentacaoSeloService {
 
     @Transactional
     public void validateDocumentacao(ValidateDocumentacaoDto validateDocumentacaoDto, Usuario usuario) throws BusinessException {
-        /*if (usuario.getTipo() != TipoUsuarioEnum.PREFEITURA) {
-            throw new BusinessException("Você não tem acesso a esse recurso", ExceptionTypesEnum.FORBIDDEN);
-        }*/
+        checkIfCanValidate(usuario);
 
         validateDto(validateDocumentacaoDto);
 
@@ -301,12 +286,14 @@ public abstract class DocumentacaoSeloService {
             return;
         }
 
-        /* Deve ir pra classe de sistema específico
-        Usuario usuarioDocumentacao = documentacaoSelo.getUsuario();
+        processDocumentacao(documentacaoSelo, validateDocumentacaoDto);
+    }
 
-        int reputacao = usuarioDocumentacao.getReputacao() + (validateDocumentacaoDto.valida() ? 10 : -10);
 
-        usuarioService.updateReputacao(usuarioDocumentacao, reputacao);
-        */
+    public abstract void checkIfCanCreate(Usuario criadorValidacao, Usuario usuario)  throws BusinessException;
+    public abstract void checkIfCanValidate( Usuario validadorEvento)  throws BusinessException;
+
+    public void processDocumentacao(DocumentacaoSelo documentacaoSelo, ValidateDocumentacaoDto validateDocumentacaoDto){
+        return;
     }
 }

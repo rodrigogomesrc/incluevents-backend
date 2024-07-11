@@ -1,4 +1,4 @@
-package br.ufrn.imd.incluevents.macarana.service;
+package br.ufrn.imd.incluevents.maracana.service;
 
 import br.ufrn.imd.incluevents.framework.model.Evento;
 import br.ufrn.imd.incluevents.framework.model.enums.OrigemEventoEnum;

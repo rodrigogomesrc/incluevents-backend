@@ -20,7 +20,7 @@ public class DocumentacaoSeloServiceNatal extends DocumentacaoSeloService {
     }
 
     @Override
-    public void processDocumentacao(DocumentacaoSelo documentacaoSelo, ValidateDocumentacaoDto validateDocumentacaoDto){
+    public void processValidacao(DocumentacaoSelo documentacaoSelo, ValidateDocumentacaoDto validateDocumentacaoDto){
         UsuarioNatal usuarioDocumentacao = (UsuarioNatal) documentacaoSelo.getUsuario();
 
         int reputacao = usuarioDocumentacao.getReputacao() + (validateDocumentacaoDto.valida() ? 10 : -10);
@@ -29,12 +29,12 @@ public class DocumentacaoSeloServiceNatal extends DocumentacaoSeloService {
     }
 
     @Override
-    public void checkIfCanCreate(Usuario criadorValidacao, Usuario usuario) throws BusinessException {
+    public void checkIfCanCreate(Usuario criadorEntidade, Usuario usuario) throws BusinessException {
         UsuarioNatal usuarioNatal = (UsuarioNatal) usuario;
 
-        if (criadorValidacao != null && criadorValidacao.getId() != usuarioNatal.getId()) {
-            throw new BusinessException("Apenas o criador pode enviar a solicitação de documentação", ExceptionTypesEnum.BAD_REQUEST.FORBIDDEN);
-        } else if (criadorValidacao == null && usuarioNatal.getReputacao() < 70) {
+        if (criadorEntidade != null && criadorEntidade.getId() != usuarioNatal.getId()) {
+            throw new BusinessException("Apenas o criador pode enviar a solicitação de documentação", ExceptionTypesEnum.FORBIDDEN);
+        } else if (criadorEntidade == null && usuarioNatal.getReputacao() < 70) {
             throw new BusinessException("Reputação insuficiente para envio de documentação", ExceptionTypesEnum.FORBIDDEN);
         }
 
@@ -45,7 +45,7 @@ public class DocumentacaoSeloServiceNatal extends DocumentacaoSeloService {
         UsuarioNatal validador = (UsuarioNatal) validadorEvento;
 
         if (validador.getTipo() != TipoUsuarioEnumNatal.PREFEITURA) {
-            throw new BusinessException("Apenas a prefeitura pode validar a documentação", ExceptionTypesEnum.BAD_REQUEST.FORBIDDEN);
+            throw new BusinessException("Apenas a prefeitura pode validar a documentação", ExceptionTypesEnum.FORBIDDEN);
         }
     }
 }

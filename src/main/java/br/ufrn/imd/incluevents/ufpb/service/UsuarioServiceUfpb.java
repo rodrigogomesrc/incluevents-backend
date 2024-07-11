@@ -43,6 +43,7 @@ public class UsuarioServiceUfpb extends UsuarioService {
 
         super.parseDtoToEntity(createUsuarioDtoUfpb, usuarioUfpb);
 
+        usuarioUfpb.setImc(createUsuarioDtoUfpb.imc());
         usuarioUfpb.setCargo(createUsuarioDtoUfpb.cargo());
         usuarioUfpb.setTempoServico(createUsuarioDtoUfpb.tempoServico());
         usuarioUfpb.setTipo(createUsuarioDtoUfpb.tipo());

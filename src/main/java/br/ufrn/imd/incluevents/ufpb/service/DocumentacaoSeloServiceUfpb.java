@@ -19,15 +19,15 @@ public class DocumentacaoSeloServiceUfpb extends DocumentacaoSeloService {
     }
 
     @Override
-    public void checkIfCanCreate(Usuario criadorValidacao, Usuario usuario) throws BusinessException {
-        UsuarioUfpb criadorEventoUfpb = (UsuarioUfpb) criadorValidacao;
+    public void checkIfCanCreate(Usuario criadorEntidade, Usuario usuario) throws BusinessException {
+        UsuarioUfpb criadorEventoUfpb = (UsuarioUfpb) criadorEntidade;
 
-        if (criadorValidacao == null) {
-            throw new BusinessException("É necessário ter um criador", ExceptionTypesEnum.BAD_REQUEST.FORBIDDEN);
+        if (criadorEntidade == null) {
+            throw new BusinessException("É necessário ter um criador", ExceptionTypesEnum.FORBIDDEN);
         }else if(criadorEventoUfpb.getTipo() != TipoUsuarioEnumUfpb.SERVIDOR || criadorEventoUfpb.getTipo() != TipoUsuarioEnumUfpb.ESTUDANTE){
-            throw new BusinessException("É necessário ser um servidor ou estudante", ExceptionTypesEnum.BAD_REQUEST.FORBIDDEN);
+            throw new BusinessException("É necessário ser um servidor ou estudante", ExceptionTypesEnum.FORBIDDEN);
         }else if(criadorEventoUfpb.getTipo() != TipoUsuarioEnumUfpb.ESTUDANTE && criadorEventoUfpb.getImc() < 7){
-            throw new BusinessException("Se for um estudante, é necessário ter o imc maior ou igual a 7", ExceptionTypesEnum.BAD_REQUEST.FORBIDDEN);
+            throw new BusinessException("Se for um estudante, é necessário ter o imc maior ou igual a 7", ExceptionTypesEnum.FORBIDDEN);
         }
 
     }
@@ -35,11 +35,12 @@ public class DocumentacaoSeloServiceUfpb extends DocumentacaoSeloService {
 
     @Override
     public void checkIfCanValidate( Usuario validadorEvento)  throws BusinessException {
+        UsuarioUfpb validatorEventoUfpb = (UsuarioUfpb) validadorEvento;
 
         if (validadorEvento == null) {
-            throw new BusinessException("É necessário ter um validador", ExceptionTypesEnum.BAD_REQUEST.FORBIDDEN);
-        }else if(((UsuarioUfpb) validadorEvento).getTipo() != TipoUsuarioEnumUfpb.ORGAO_VALIDACAO){
-            throw new BusinessException("É necessário ser um órgão validador", ExceptionTypesEnum.BAD_REQUEST.FORBIDDEN);
+            throw new BusinessException("É necessário ter um validador", ExceptionTypesEnum.FORBIDDEN);
+        }else if(validatorEventoUfpb.getTipo() != TipoUsuarioEnumUfpb.SERVIDOR || validatorEventoUfpb.getCargo() != CargoEnumUfpb.COORDENACAO){
+            throw new BusinessException("É necessário ser da coordenação", ExceptionTypesEnum.FORBIDDEN);
         }
     }
 }

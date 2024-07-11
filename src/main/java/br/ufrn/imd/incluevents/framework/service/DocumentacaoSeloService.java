@@ -286,14 +286,14 @@ public abstract class DocumentacaoSeloService {
             return;
         }
 
-        processDocumentacao(documentacaoSelo, validateDocumentacaoDto);
+        processValidacao(documentacaoSelo, validateDocumentacaoDto);
     }
 
 
-    public abstract void checkIfCanCreate(Usuario criadorValidacao, Usuario usuario)  throws BusinessException;
+    public abstract void checkIfCanCreate(Usuario criadorEntidade, Usuario usuario)  throws BusinessException;
     public abstract void checkIfCanValidate( Usuario validadorEvento)  throws BusinessException;
 
-    public void processDocumentacao(DocumentacaoSelo documentacaoSelo, ValidateDocumentacaoDto validateDocumentacaoDto){
+    public void processValidacao(DocumentacaoSelo documentacaoSelo, ValidateDocumentacaoDto validateDocumentacaoDto){
         return;
     }
 }

@@ -1,15 +1,15 @@
-package br.ufrn.imd.incluevents.macarana.controller;
+package br.ufrn.imd.incluevents.maracana.controller;
 
 import br.ufrn.imd.incluevents.framework.controller.GetHttpCode;
 import br.ufrn.imd.incluevents.framework.controller.UsuarioController;
 import br.ufrn.imd.incluevents.framework.controller.component.GetUsuarioLogadoHelper;
 import br.ufrn.imd.incluevents.framework.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.framework.service.UsuarioService;
-import br.ufrn.imd.incluevents.macarana.dtos.CreateUsuarioDtoMaracana;
-import br.ufrn.imd.incluevents.macarana.dtos.UpdateUsuarioDtoMaracana;
-import br.ufrn.imd.incluevents.macarana.dtos.ValidateDocumentacaoUsuarioDtoMaracana;
-import br.ufrn.imd.incluevents.macarana.model.UsuarioMaracana;
-import br.ufrn.imd.incluevents.macarana.service.UsuarioServiceMaracana;
+import br.ufrn.imd.incluevents.maracana.dtos.CreateUsuarioDtoMaracana;
+import br.ufrn.imd.incluevents.maracana.dtos.UpdateUsuarioDtoMaracana;
+import br.ufrn.imd.incluevents.maracana.dtos.ValidateDocumentacaoUsuarioDtoMaracana;
+import br.ufrn.imd.incluevents.maracana.model.UsuarioMaracana;
+import br.ufrn.imd.incluevents.maracana.service.UsuarioServiceMaracana;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

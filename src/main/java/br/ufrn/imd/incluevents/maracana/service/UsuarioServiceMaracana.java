@@ -1,4 +1,4 @@
-package br.ufrn.imd.incluevents.macarana.service;
+package br.ufrn.imd.incluevents.maracana.service;
 
 import br.ufrn.imd.incluevents.framework.dto.CreateUsuarioDto;
 import br.ufrn.imd.incluevents.framework.dto.UpdateUsuarioDto;
@@ -8,10 +8,10 @@ import br.ufrn.imd.incluevents.framework.model.Usuario;
 import br.ufrn.imd.incluevents.framework.repository.UsuarioRepository;
 import br.ufrn.imd.incluevents.framework.service.StorageService;
 import br.ufrn.imd.incluevents.framework.service.UsuarioService;
-import br.ufrn.imd.incluevents.macarana.dtos.CreateUsuarioDtoMaracana;
-import br.ufrn.imd.incluevents.macarana.dtos.ValidateDocumentacaoUsuarioDtoMaracana;
-import br.ufrn.imd.incluevents.macarana.model.UsuarioMaracana;
-import br.ufrn.imd.incluevents.macarana.model.enums.TipoUsuarioEnumMaracana;
+import br.ufrn.imd.incluevents.maracana.dtos.CreateUsuarioDtoMaracana;
+import br.ufrn.imd.incluevents.maracana.dtos.ValidateDocumentacaoUsuarioDtoMaracana;
+import br.ufrn.imd.incluevents.maracana.model.UsuarioMaracana;
+import br.ufrn.imd.incluevents.maracana.model.enums.TipoUsuarioEnumMaracana;
 
 import org.springframework.stereotype.Service;
 

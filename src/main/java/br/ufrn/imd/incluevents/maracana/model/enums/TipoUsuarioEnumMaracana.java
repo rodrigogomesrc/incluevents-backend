@@ -1,4 +1,4 @@
-package br.ufrn.imd.incluevents.macarana.model.enums;
+package br.ufrn.imd.incluevents.maracana.model.enums;
 
 public enum TipoUsuarioEnumMaracana {
     COMUM,

@@ -1,4 +1,4 @@
-package br.ufrn.imd.incluevents.macarana.service;
+package br.ufrn.imd.incluevents.maracana.service;
 
 import br.ufrn.imd.incluevents.framework.exceptions.BusinessException;
 import br.ufrn.imd.incluevents.framework.model.Usuario;
@@ -8,8 +8,8 @@ import br.ufrn.imd.incluevents.framework.service.EventoService;
 import br.ufrn.imd.incluevents.framework.service.SeloService;
 import br.ufrn.imd.incluevents.framework.service.UsuarioService;
 import br.ufrn.imd.incluevents.framework.service.VotacaoSeloService;
-import br.ufrn.imd.incluevents.macarana.model.UsuarioMaracana;
-import br.ufrn.imd.incluevents.macarana.model.enums.TipoUsuarioEnumMaracana;
+import br.ufrn.imd.incluevents.maracana.model.UsuarioMaracana;
+import br.ufrn.imd.incluevents.maracana.model.enums.TipoUsuarioEnumMaracana;
 
 import java.time.LocalDate;
 import java.time.ZoneId;

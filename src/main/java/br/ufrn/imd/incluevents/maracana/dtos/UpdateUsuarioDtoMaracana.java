@@ -1,4 +1,4 @@
-package br.ufrn.imd.incluevents.macarana.dtos;
+package br.ufrn.imd.incluevents.maracana.dtos;
 
 import br.ufrn.imd.incluevents.framework.dto.UpdateUsuarioDto;
 

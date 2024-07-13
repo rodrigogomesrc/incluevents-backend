@@ -36,7 +36,7 @@ public class UsuarioControllerMaracana extends UsuarioController {
     }
 
     @PostMapping("/validate-documentacao")
-    public ResponseEntity<?> create(ValidateDocumentacaoUsuarioDtoMaracana validateDocumentacaoUsuarioDtoMaracana) {
+    public ResponseEntity<?> create(@RequestBody ValidateDocumentacaoUsuarioDtoMaracana validateDocumentacaoUsuarioDtoMaracana) {
         try {
             UsuarioMaracana usuario = (UsuarioMaracana) getUsuarioLogadoHelper.getUsuarioLogado();
 

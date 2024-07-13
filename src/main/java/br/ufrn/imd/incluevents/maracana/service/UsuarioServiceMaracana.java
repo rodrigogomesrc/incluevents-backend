@@ -47,8 +47,11 @@ public class UsuarioServiceMaracana extends UsuarioService {
 
         usuarioMaracana.setCriadoEm(new Date());
         usuarioMaracana.setTipo(createUsuarioDtoMaracana.tipo());
-        usuarioMaracana.setNomeDocumentacao(createUsuarioDtoMaracana.documentacao().getOriginalFilename());
-        usuarioMaracana.setUrlDocumentacao(this.storageService.store(createUsuarioDtoMaracana.documentacao()));
+
+        if (createUsuarioDtoMaracana.tipo() == TipoUsuarioEnumMaracana.ESPECIALISTA) {
+            usuarioMaracana.setNomeDocumentacao(createUsuarioDtoMaracana.documentacao().getOriginalFilename());
+            usuarioMaracana.setUrlDocumentacao(this.storageService.store(createUsuarioDtoMaracana.documentacao()));
+        }
 
         return usuarioMaracana;
     }

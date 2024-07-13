@@ -26,8 +26,7 @@ public class UsuarioControllerMaracana extends UsuarioController {
     }
 
     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<?> createUsuario(@RequestBody CreateUsuarioDtoMaracana createUsuarioDtoMaracana) {
-
+    public ResponseEntity<?> createUsuario(CreateUsuarioDtoMaracana createUsuarioDtoMaracana) {
         return super.createUsuarioBase(createUsuarioDtoMaracana);
     }
 

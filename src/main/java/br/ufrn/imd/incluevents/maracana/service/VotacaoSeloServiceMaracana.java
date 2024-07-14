@@ -47,9 +47,9 @@ public class VotacaoSeloServiceMaracana extends VotacaoSeloService {
         int acrescimo = (int) Math.floor(50 + ChronoUnit.DAYS.between(date, today) / 60.0);
 
         if (usuarioMaracana.getTipo() == TipoUsuarioEnumMaracana.ESPECIALISTA) {
-            return 50 + acrescimo;
+            return 100 + acrescimo;
         } else  {
-            return 10 + acrescimo;
+            return 50 + acrescimo;
         }
     }
 }

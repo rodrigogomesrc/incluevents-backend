@@ -19,7 +19,9 @@ public class Evento {
     private String local;
     @Column(length = 3000)
     private String descricao;
+    @Column(length = 1000)
     private String urlOriginal;
+    @Column(length = 1000)
     private String imagemUrl;
     private Date inicio;
     private Date fim;

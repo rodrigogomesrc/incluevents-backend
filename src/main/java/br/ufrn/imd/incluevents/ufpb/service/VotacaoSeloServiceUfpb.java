@@ -43,28 +43,30 @@ public class VotacaoSeloServiceUfpb extends VotacaoSeloService {
             if (usuarioUfpb.getImc() >= 5 && usuarioUfpb.getImc() < 6) {
                 acrescimo = 2;
             } else if (usuarioUfpb.getImc() >= 6 && usuarioUfpb.getImc() < 7) {
-                acrescimo = 3;
-            } else if (usuarioUfpb.getImc() >= 7 && usuarioUfpb.getImc() < 8.5) {
                 acrescimo = 4;
+            } else if (usuarioUfpb.getImc() >= 7 && usuarioUfpb.getImc() < 8.5) {
+                acrescimo = 6;
             } else if (usuarioUfpb.getImc() >= 8.5) {
-                acrescimo = 5;
+                acrescimo = 8;
+            } else if (usuarioUfpb.getImc() >= 9.5) {
+                acrescimo = 10;
             }
 
-            return 10 + acrescimo;
+            return 50 + acrescimo;
         } else {
             double ponderacao = 0;
 
             if (usuarioUfpb.getCargo() == CargoEnumUfpb.PROFESSOR) {
-                ponderacao = 0.5;
+                ponderacao = 1.25;
             } else if (usuarioUfpb.getCargo() == CargoEnumUfpb.REITORIA) {
-                ponderacao = 0.75;
+                ponderacao = 1.75;
             } else if (usuarioUfpb.getCargo() == CargoEnumUfpb.COORDENACAO) {
-                ponderacao = 1;
+                ponderacao = 2;
             } else {
-                ponderacao = 0.25;
+                ponderacao = 1;
             }
 
-            return (int) Math.floor(20 + usuarioUfpb.getTempoServico() * ponderacao);
+            return (int) Math.floor(100 + usuarioUfpb.getTempoServico() * ponderacao);
         }
     }
 }

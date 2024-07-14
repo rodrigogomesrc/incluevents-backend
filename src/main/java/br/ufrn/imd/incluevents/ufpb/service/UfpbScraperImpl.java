@@ -59,6 +59,7 @@ public class UfpbScraperImpl implements EventScraper {
             evento.setNome(titulo);
             evento.setUrlOriginal(url);
             evento.setOrigem(OrigemEventoEnum.UFPB);
+            evento.setLocal("UFPB");
             eventos.add(evento);
 
         });

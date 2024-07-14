@@ -4,6 +4,7 @@ package br.ufrn.imd.incluevents.framework.config;
 //import br.ufrn.imd.incluevents.natal.service.OutgoScraperImpl;
 //import br.ufrn.imd.incluevents.natal.service.SymplaScraperImpl;
 
+import br.ufrn.imd.incluevents.framework.service.EventoService;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Configuration;
@@ -11,8 +12,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class Setup implements ApplicationRunner {
 
+    private final EventoService eventoService;
 
-    public Setup() {
+    public Setup(EventoService eventoService) {
+        this.eventoService = eventoService;
     }
 
     @Override
@@ -36,5 +39,7 @@ public class Setup implements ApplicationRunner {
         //System.out.println("Eventos Maracanã buscados: ");
         //List<Evento> evntos = maracanaScraper.scrape();
         //evntos.forEach(System.out::println);
+
+//        eventoService.scrapeAndSave();
     }
 }

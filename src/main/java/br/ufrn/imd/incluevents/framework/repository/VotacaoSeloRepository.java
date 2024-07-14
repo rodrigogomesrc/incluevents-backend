@@ -34,8 +34,8 @@ public interface VotacaoSeloRepository extends JpaRepository<VotacaoSelo, Intege
       + "INNER JOIN s.votacoesSelo vs "
       + "WHERE s.evento.id = :idEvento AND s.validado = false AND vs.verificado = false "
       + "GROUP BY s "
-      + "HAVING SUM(vs.score) >= 500 "
-      + "AND SUM(CASE WHEN possuiSelo = true THEN vs.score ELSE 0 END) * 100 / SUM(vs.score) >= 70"
+//      + "HAVING SUM(vs.score) >= 500 "
+//      + "AND SUM(CASE WHEN possuiSelo = true THEN vs.score ELSE 0 END) * 100 / SUM(vs.score) >= 70"
   )
   public List<GrupoVotacaoSeloDto> findValidacoesPendentesByEvento(@Param("idEvento") int idEvento);
 

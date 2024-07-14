@@ -23,7 +23,7 @@ public class DocumentacaoSeloServiceMaracana extends DocumentacaoSeloService {
 
         if (criador == null) {
             throw new BusinessException("É necessário ter um criador", ExceptionTypesEnum.FORBIDDEN);
-        }else if(criador.getTipo() != TipoUsuarioEnumMaracana.ESPECIALISTA || !criador.getDocumentacaoValida()){
+        }else if(criador.getTipo() != TipoUsuarioEnumMaracana.ESPECIALISTA && !criador.getDocumentacaoValida()){
             throw new BusinessException("É necessário ser um especialista com documentação válida", ExceptionTypesEnum.FORBIDDEN);
         }
     }

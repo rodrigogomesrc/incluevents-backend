@@ -20,13 +20,13 @@ public class DocumentacaoSeloServiceUfpb extends DocumentacaoSeloService {
 
     @Override
     public void checkIfCanCreate(Usuario criadorEntidade, Usuario usuario) throws BusinessException {
-        UsuarioUfpb criadorEventoUfpb = (UsuarioUfpb) criadorEntidade;
+        UsuarioUfpb criadorEventoUfpb = (UsuarioUfpb) usuario;
 
-        if (criadorEntidade == null) {
+        if (usuario == null) {
             throw new BusinessException("É necessário ter um criador", ExceptionTypesEnum.FORBIDDEN);
-        }else if(criadorEventoUfpb.getTipo() != TipoUsuarioEnumUfpb.SERVIDOR || criadorEventoUfpb.getTipo() != TipoUsuarioEnumUfpb.ESTUDANTE){
+        }else if(criadorEventoUfpb.getTipo() != TipoUsuarioEnumUfpb.SERVIDOR && criadorEventoUfpb.getTipo() != TipoUsuarioEnumUfpb.ESTUDANTE){
             throw new BusinessException("É necessário ser um servidor ou estudante", ExceptionTypesEnum.FORBIDDEN);
-        }else if(criadorEventoUfpb.getTipo() != TipoUsuarioEnumUfpb.ESTUDANTE && criadorEventoUfpb.getImc() < 7){
+        }else if(criadorEventoUfpb.getTipo() == TipoUsuarioEnumUfpb.ESTUDANTE && criadorEventoUfpb.getImc() < 7.0){
             throw new BusinessException("Se for um estudante, é necessário ter o imc maior ou igual a 7", ExceptionTypesEnum.FORBIDDEN);
         }
 

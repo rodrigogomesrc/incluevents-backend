@@ -29,7 +29,7 @@ public class UfpbScraperImpl implements EventScraper {
     @Override
     public List<Evento> scrape() {
         List<Evento> eventos = scrapeList();
-        eventos.forEach(this::preencherDetalhes);
+//        eventos.forEach(this::preencherDetalhes);
         return eventos;
     }
 
